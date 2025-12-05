@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/Layout';
 import { ShopCard } from '@/components/shops/ShopCard';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -11,12 +11,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockShops, categories } from '@/data/mockData';
+import { shopService } from '@/services/shop.service';
 import { ProductCategory, ShopFilters } from '@/types';
+import { Loader2 } from 'lucide-react';
+
+const categories: { id: ProductCategory; name: string }[] = [
+  { id: 'CROCHET', name: 'Crochet' },
+  { id: 'ART', name: 'Art' },
+  { id: 'PAINTING', name: 'Painting' },
+  { id: 'HANDCRAFT', name: 'Handcraft' },
+];
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
-  { value: 'popular', label: 'Most Followers' },
+  { value: 'popular', label: 'Most Sales' },
   { value: 'rating', label: 'Highest Rated' },
 ];
 
@@ -30,15 +38,20 @@ export default function Shops() {
     sortBy: 'popular',
   });
 
-  const filteredShops = useMemo(() => {
-    let result = [...mockShops];
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['shops', filters.category],
+    queryFn: () => shopService.listShops({
+      category: filters.category,
+      limit: 100, // Fetch more to allow client-side filtering/sorting for now
+    }),
+  });
 
-    if (filters.category) {
-      result = result.filter(s => s.category === filters.category);
-    }
+  const filteredShops = useMemo(() => {
+    if (!data?.data?.items) return [];
+    let result = [...data.data.items];
 
     if (filters.isVerified) {
-      result = result.filter(s => s.isVerified);
+      result = result.filter(s => s.verificationStatus === 'VERIFIED');
     }
 
     switch (filters.sortBy) {
@@ -50,11 +63,11 @@ export default function Shops() {
         break;
       case 'popular':
       default:
-        result.sort((a, b) => b.followers - a.followers);
+        result.sort((a, b) => b.totalSales - a.totalSales);
     }
 
     return result;
-  }, [filters]);
+  }, [data, filters]);
 
   return (
     <Layout>
@@ -65,7 +78,7 @@ export default function Shops() {
             Meet Our Artisans
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover talented creators from around the world. Each shop tells a unique story 
+            Discover talented creators from around the world. Each shop tells a unique story
             of passion, creativity, and craftsmanship.
           </p>
         </div>
@@ -136,7 +149,15 @@ export default function Shops() {
         </div>
 
         {/* Shops Grid */}
-        {filteredShops.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-20 text-red-500">
+            Failed to load shops. Please try again later.
+          </div>
+        ) : filteredShops.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredShops.map((shop, index) => (
               <div
@@ -157,3 +178,4 @@ export default function Shops() {
     </Layout>
   );
 }
+

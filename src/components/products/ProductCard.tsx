@@ -11,27 +11,29 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
-  const discount = product.compareAtPrice 
+  // API returns images as string[], so we take the first one
+  const primaryImage = product.images && product.images.length > 0 ? product.images[0] : '/placeholder-product.jpg';
+
+  const discount = product.compareAtPrice
     ? Math.round((1 - product.price / product.compareAtPrice) * 100)
     : null;
 
   return (
     <div className={cn('group relative', className)}>
-      <Link to={`/products/${product.slug}`} className="block">
+      <Link to={`/products/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
           <img
-            src={primaryImage?.url}
-            alt={primaryImage?.alt || product.name}
+            src={primaryImage}
+            alt={product.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          
+
           {/* Overlay Actions */}
           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300" />
-          
+
           {/* Wishlist Button */}
-          <button 
+          <button
             className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110"
             onClick={(e) => {
               e.preventDefault();
@@ -48,14 +50,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 -{discount}%
               </Badge>
             )}
-            {product.isFeatured && (
-              <Badge variant="secondary">Featured</Badge>
-            )}
           </div>
 
           {/* Quick Add Button */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-            <Button 
+            <Button
               className="w-full gap-2"
               onClick={(e) => {
                 e.preventDefault();
@@ -71,13 +70,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
       {/* Product Info */}
       <div className="mt-4 space-y-2">
-        <Link 
-          to={`/shops/${product.shop.slug}`}
+        <Link
+          to={`/shops/${product.shop.id}`}
           className="text-xs text-muted-foreground hover:text-primary transition-colors"
         >
           {product.shop.name}
         </Link>
-        
+
         <Link to={`/products/${product.slug}`}>
           <h3 className="font-medium line-clamp-2 group-hover:text-primary transition-colors">
             {product.name}
@@ -90,7 +89,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <span className="text-sm font-medium">{product.rating}</span>
           </div>
           <span className="text-sm text-muted-foreground">
-            ({product.reviewCount})
+            ({product.totalReviews})
           </span>
         </div>
 
@@ -106,3 +105,4 @@ export function ProductCard({ product, className }: ProductCardProps) {
     </div>
   );
 }
+

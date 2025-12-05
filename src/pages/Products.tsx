@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, SlidersHorizontal, Grid, LayoutGrid, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Filter, SlidersHorizontal, Grid, LayoutGrid, X, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
@@ -22,8 +23,15 @@ import {
 } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
-import { mockProducts, categories } from '@/data/mockData';
+import { productService } from '@/services/product.service';
 import { ProductCategory, ProductFilters } from '@/types';
+
+const categories: { id: ProductCategory; name: string }[] = [
+  { id: 'CROCHET', name: 'Crochet' },
+  { id: 'ART', name: 'Art' },
+  { id: 'PAINTING', name: 'Painting' },
+  { id: 'HANDCRAFT', name: 'Handcraft' },
+];
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
@@ -49,39 +57,33 @@ export default function Products() {
     isHandmade: false,
   });
 
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['products', filters.category, searchParam, priceRange, filters.sortBy],
+    queryFn: () => productService.listProducts({
+      category: filters.category,
+      search: searchParam,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+      limit: 100, // Fetch more for client-side sorting if needed
+    }),
+  });
+
   const filteredProducts = useMemo(() => {
-    let result = [...mockProducts];
+    if (!data?.data?.items) return [];
+    let result = [...data.data.items];
 
-    // Search filter
-    if (searchParam) {
-      const search = searchParam.toLowerCase();
-      result = result.filter(
-        p =>
-          p.name.toLowerCase().includes(search) ||
-          p.description.toLowerCase().includes(search) ||
-          p.tags.some(t => t.toLowerCase().includes(search))
-      );
-    }
-
-    // Category filter
-    if (filters.category) {
-      result = result.filter(p => p.category === filters.category);
-    }
-
-    // Price filter
-    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
-    // In stock filter
+    // In stock filter (Client side)
     if (filters.inStock) {
       result = result.filter(p => p.stock > 0);
     }
 
-    // Handmade filter
+    // Handmade filter (Client side - assuming all are handmade or based on category/tags)
     if (filters.isHandmade) {
-      result = result.filter(p => p.isHandmade);
+      // API doesn't have isHandmade, maybe check tags?
+      result = result.filter(p => p.tags.includes('handmade'));
     }
 
-    // Sorting
+    // Sorting (Client side if API doesn't support all)
     switch (filters.sortBy) {
       case 'price-low':
         result.sort((a, b) => a.price - b.price);
@@ -93,7 +95,7 @@ export default function Products() {
         result.sort((a, b) => b.rating - a.rating);
         break;
       case 'popular':
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        result.sort((a, b) => b.totalReviews - a.totalReviews);
         break;
       case 'newest':
       default:
@@ -101,7 +103,7 @@ export default function Products() {
     }
 
     return result;
-  }, [searchParam, filters, priceRange]);
+  }, [data, filters]);
 
   const activeFiltersCount = [
     filters.category,
@@ -139,9 +141,6 @@ export default function Products() {
                 }
               />
               <span className="text-sm">{cat.name}</span>
-              <span className="text-xs text-muted-foreground ml-auto">
-                ({cat.productCount})
-              </span>
             </label>
           ))}
         </div>
@@ -217,8 +216,8 @@ export default function Products() {
             {categoryParam
               ? categories.find(c => c.id === categoryParam)?.name || 'Products'
               : searchParam
-              ? `Search: "${searchParam}"`
-              : 'All Products'}
+                ? `Search: "${searchParam}"`
+                : 'All Products'}
           </h1>
           <p className="text-muted-foreground">
             {filteredProducts.length} products found
@@ -299,7 +298,15 @@ export default function Products() {
             </div>
 
             {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-20 text-red-500">
+                Failed to load products. Please try again later.
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product, index) => (
                   <div
@@ -323,3 +330,4 @@ export default function Products() {
     </Layout>
   );
 }
+

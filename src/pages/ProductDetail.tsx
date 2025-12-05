@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
-  Star, Heart, ShoppingBag, Minus, Plus, Truck, Shield, 
-  RefreshCw, ChevronRight, Check, BadgeCheck, MessageCircle 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Star, Heart, ShoppingBag, Minus, Plus, Truck, Shield,
+  RefreshCw, ChevronRight, Check, BadgeCheck, MessageCircle, Loader2
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
@@ -24,16 +26,61 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { mockProducts, mockProductReviews } from '@/data/mockData';
+import { productService } from '@/services/product.service';
+import { reviewService } from '@/services/review.service';
+import { cartService } from '@/services/cart.service';
 import { cn } from '@/lib/utils';
 
 export default function ProductDetail() {
-  const { slug } = useParams();
-  const product = mockProducts.find(p => p.slug === slug);
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const [selectedColor, setSelectedColor] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
+
+  const { data: productData, isLoading: isProductLoading } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productService.getProduct(id!),
+    enabled: !!id,
+  });
+
+  const { data: reviewsData, isLoading: isReviewsLoading } = useQuery({
+    queryKey: ['product-reviews', id],
+    queryFn: () => reviewService.getReviews(id!, { limit: 20 }),
+    enabled: !!id,
+  });
+
+  const { data: relatedData } = useQuery({
+    queryKey: ['related-products', productData?.data?.category],
+    queryFn: () => productService.listProducts({ category: productData?.data?.category, limit: 4 }),
+    enabled: !!productData?.data?.category,
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: cartService.addItem,
+    onSuccess: () => {
+      toast.success('Added to cart');
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+    onError: () => {
+      toast.error('Failed to add to cart');
+    },
+  });
+
+  const product = productData?.data;
+  const reviews = reviewsData?.data?.items || [];
+  const relatedProducts = relatedData?.data?.items?.filter(p => p.id !== product?.id).slice(0, 4) || [];
+
+  if (isProductLoading) {
+    return (
+      <Layout>
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
@@ -48,13 +95,32 @@ export default function ProductDetail() {
     );
   }
 
-  const relatedProducts = mockProducts
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  // Handle variations if available
+  const sizeVariation = product.variations?.find(v => v.name === 'Size');
+  const colorVariation = product.variations?.find(v => v.name === 'Color');
 
-  const currentPrice = selectedSize
-    ? product.sizes?.find(s => s.name === selectedSize)?.price || product.price
+  const currentPrice = selectedSize && sizeVariation
+    ? sizeVariation.options.find(o => o.value === selectedSize)?.price || product.price
     : product.price;
+
+  const handleAddToCart = () => {
+    if (sizeVariation && !selectedSize) {
+      toast.error('Please select a size');
+      return;
+    }
+    if (colorVariation && !selectedColor) {
+      toast.error('Please select a color');
+      return;
+    }
+
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity,
+      variationId: sizeVariation?.options.find(o => o.value === selectedSize)?.id, // Simplified logic
+    });
+  };
+
+  const images = product.images && product.images.length > 0 ? product.images : ['/placeholder-product.jpg'];
 
   return (
     <Layout>
@@ -66,8 +132,8 @@ export default function ProductDetail() {
             <ChevronRight className="h-4 w-4" />
             <Link to="/products" className="hover:text-primary">Products</Link>
             <ChevronRight className="h-4 w-4" />
-            <Link 
-              to={`/products?category=${product.category}`} 
+            <Link
+              to={`/products?category=${product.category}`}
               className="hover:text-primary capitalize"
             >
               {product.category}
@@ -84,16 +150,16 @@ export default function ProductDetail() {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
               <img
-                src={product.images[selectedImage]?.url}
-                alt={product.images[selectedImage]?.alt || product.name}
+                src={images[selectedImage]}
+                alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            {product.images.length > 1 && (
+            {images.length > 1 && (
               <div className="flex gap-3">
-                {product.images.map((img, index) => (
+                {images.map((img, index) => (
                   <button
-                    key={img.id}
+                    key={index}
                     onClick={() => setSelectedImage(index)}
                     className={cn(
                       'w-20 h-20 rounded-lg overflow-hidden border-2 transition-all',
@@ -103,8 +169,8 @@ export default function ProductDetail() {
                     )}
                   >
                     <img
-                      src={img.url}
-                      alt={img.alt}
+                      src={img}
+                      alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -116,26 +182,24 @@ export default function ProductDetail() {
           {/* Product Info */}
           <div className="space-y-6">
             {/* Shop Link */}
-            <Link 
-              to={`/shops/${product.shop.slug}`}
+            <Link
+              to={`/shops/${product.shop.id}`}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               <img
-                src={product.shop.logo}
+                src={product.shop.logo || '/placeholder-shop.jpg'}
                 alt={product.shop.name}
                 className="w-6 h-6 rounded-full object-cover"
               />
               {product.shop.name}
-              {product.shop.isVerified && (
-                <BadgeCheck className="h-4 w-4 text-primary" />
-              )}
+              {/* Verification status not in product.shop, fetch shop if needed or ignore */}
             </Link>
 
             <div>
               <h1 className="font-display text-3xl md:text-4xl mb-3">
                 {product.name}
               </h1>
-              
+
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
@@ -152,7 +216,7 @@ export default function ProductDetail() {
                 </div>
                 <span className="font-medium">{product.rating}</span>
                 <span className="text-muted-foreground">
-                  ({product.reviewCount} reviews)
+                  ({product.totalReviews} reviews)
                 </span>
               </div>
 
@@ -174,7 +238,7 @@ export default function ProductDetail() {
             <p className="text-muted-foreground">{product.shortDescription}</p>
 
             {/* Size Selection */}
-            {product.sizes && product.sizes.length > 0 && (
+            {sizeVariation && (
               <div>
                 <label className="block text-sm font-medium mb-2">Size</label>
                 <Select value={selectedSize} onValueChange={setSelectedSize}>
@@ -182,12 +246,12 @@ export default function ProductDetail() {
                     <SelectValue placeholder="Select a size" />
                   </SelectTrigger>
                   <SelectContent>
-                    {product.sizes.map(size => (
-                      <SelectItem key={size.id} value={size.name}>
-                        {size.name} - ${size.price.toFixed(2)}
-                        {size.stock < 5 && (
+                    {sizeVariation.options.map(opt => (
+                      <SelectItem key={opt.id} value={opt.value}>
+                        {opt.value} {opt.price ? `- $${opt.price.toFixed(2)}` : ''}
+                        {opt.stock && opt.stock < 5 && (
                           <span className="text-destructive ml-2">
-                            Only {size.stock} left
+                            Only {opt.stock} left
                           </span>
                         )}
                       </SelectItem>
@@ -198,24 +262,24 @@ export default function ProductDetail() {
             )}
 
             {/* Color Selection */}
-            {product.colors && product.colors.length > 0 && (
+            {colorVariation && (
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Color: {selectedColor || 'Select'}
                 </label>
                 <div className="flex gap-2 flex-wrap">
-                  {product.colors.map(color => (
+                  {colorVariation.options.map(opt => (
                     <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
+                      key={opt.id}
+                      onClick={() => setSelectedColor(opt.value)}
                       className={cn(
                         'px-4 py-2 rounded-lg border text-sm transition-all',
-                        selectedColor === color
+                        selectedColor === opt.value
                           ? 'border-primary bg-primary/10'
                           : 'border-border hover:border-muted-foreground/50'
                       )}
                     >
-                      {color}
+                      {opt.value}
                     </button>
                   ))}
                 </div>
@@ -246,8 +310,12 @@ export default function ProductDetail() {
 
             {/* Actions */}
             <div className="flex gap-3">
-              <Button size="lg" className="flex-1 gap-2">
-                <ShoppingBag className="h-5 w-5" />
+              <Button size="lg" className="flex-1 gap-2" onClick={handleAddToCart} disabled={addToCartMutation.isPending}>
+                {addToCartMutation.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <ShoppingBag className="h-5 w-5" />
+                )}
                 Add to Cart
               </Button>
               <Button size="lg" variant="outline">
@@ -276,18 +344,21 @@ export default function ProductDetail() {
             </div>
 
             {/* Processing Time */}
+            {/* Assuming attributes has processing time and materials */}
             <div className="p-4 bg-muted/50 rounded-xl">
-              <div className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-sage-dark" />
-                <span>
-                  <strong>Processing time:</strong> {product.processingTime}
-                </span>
-              </div>
-              {product.materials && (
+              {product.attributes?.processingTime && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-sage-dark" />
+                  <span>
+                    <strong>Processing time:</strong> {product.attributes.processingTime}
+                  </span>
+                </div>
+              )}
+              {product.attributes?.materials && (
                 <div className="flex items-center gap-2 text-sm mt-2">
                   <Check className="h-4 w-4 text-sage-dark" />
                   <span>
-                    <strong>Materials:</strong> {product.materials.join(', ')}
+                    <strong>Materials:</strong> {product.attributes.materials}
                   </span>
                 </div>
               )}
@@ -298,32 +369,25 @@ export default function ProductDetail() {
         {/* Tabs Section */}
         <Tabs defaultValue="description" className="mt-12">
           <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-            <TabsTrigger 
+            <TabsTrigger
               value="description"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
               Description
             </TabsTrigger>
-            {product.sizeChart && (
-              <TabsTrigger 
-                value="size-chart"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-              >
-                Size Chart
-              </TabsTrigger>
-            )}
-            <TabsTrigger 
+            {/* Size chart removed as it's complex to map from generic attributes without specific structure */}
+            <TabsTrigger
               value="reviews"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
-              Reviews ({product.reviewCount})
+              Reviews ({product.totalReviews})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="description" className="mt-6">
             <div className="prose max-w-none">
               <p>{product.description}</p>
-              {product.tags.length > 0 && (
+              {product.tags && product.tags.length > 0 && (
                 <div className="flex gap-2 flex-wrap mt-4 not-prose">
                   {product.tags.map(tag => (
                     <Badge key={tag} variant="secondary">
@@ -335,81 +399,59 @@ export default function ProductDetail() {
             </div>
           </TabsContent>
 
-          {product.sizeChart && (
-            <TabsContent value="size-chart" className="mt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Size</TableHead>
-                    {product.sizeChart[0].width && <TableHead>Width</TableHead>}
-                    {product.sizeChart[0].length && <TableHead>Length</TableHead>}
-                    {product.sizeChart[0].bust && <TableHead>Bust</TableHead>}
-                    {product.sizeChart[0].waist && <TableHead>Waist</TableHead>}
-                    {product.sizeChart[0].hips && <TableHead>Hips</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {product.sizeChart.map((row) => (
-                    <TableRow key={row.size}>
-                      <TableCell className="font-medium">{row.size}</TableCell>
-                      {row.width && <TableCell>{row.width}</TableCell>}
-                      {row.length && <TableCell>{row.length}</TableCell>}
-                      {row.bust && <TableCell>{row.bust}</TableCell>}
-                      {row.waist && <TableCell>{row.waist}</TableCell>}
-                      {row.hips && <TableCell>{row.hips}</TableCell>}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-          )}
-
           <TabsContent value="reviews" className="mt-6">
-            <div className="space-y-6">
-              {mockProductReviews.map(review => (
-                <div key={review.id} className="p-6 bg-card rounded-xl border">
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={review.user.avatar}
-                      alt={review.user.firstName}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <span className="font-medium">
-                            {review.user.firstName} {review.user.lastName}
+            {isReviewsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {reviews.map(review => (
+                  <div key={review.id} className="p-6 bg-card rounded-xl border">
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={review.user?.avatar || '/placeholder-avatar.jpg'}
+                        alt={review.user?.firstName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <span className="font-medium">
+                              {review.user?.firstName} {review.user?.lastName}
+                            </span>
+                            {/* Verified purchase check if available in review data */}
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(review.createdAt).toLocaleDateString()}
                           </span>
-                          {review.verified && (
-                            <Badge variant="success" className="ml-2">
-                              Verified Purchase
-                            </Badge>
-                          )}
                         </div>
-                        <span className="text-sm text-muted-foreground">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </span>
+                        <div className="flex items-center gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={cn(
+                                'h-4 w-4',
+                                i < review.rating
+                                  ? 'fill-primary text-primary'
+                                  : 'text-muted'
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <h4 className="font-medium mb-1">{review.title}</h4>
+                        <p className="text-muted-foreground">{review.comment}</p>
                       </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={cn(
-                              'h-4 w-4',
-                              i < review.rating
-                                ? 'fill-primary text-primary'
-                                : 'text-muted'
-                            )}
-                          />
-                        ))}
-                      </div>
-                      <h4 className="font-medium mb-1">{review.title}</h4>
-                      <p className="text-muted-foreground">{review.comment}</p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+                {reviews.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No reviews yet</p>
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

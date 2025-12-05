@@ -1,14 +1,27 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Heart, Package, Shield } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Sparkles, Heart, Package, Shield, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ShopCard } from '@/components/shops/ShopCard';
 import { Button } from '@/components/ui/button';
-import { mockProducts, mockShops, categories } from '@/data/mockData';
+import { categories } from '@/data/mockData';
+import { productService } from '@/services/product.service';
+import { shopService } from '@/services/shop.service';
 
 export default function Index() {
-  const featuredProducts = mockProducts.filter(p => p.isFeatured).slice(0, 4);
-  const featuredShops = mockShops.slice(0, 3);
+  const { data: productsData, isLoading: isProductsLoading } = useQuery({
+    queryKey: ['featured-products'],
+    queryFn: () => productService.listProducts({ limit: 4, sortBy: 'popular' }),
+  });
+
+  const { data: shopsData, isLoading: isShopsLoading } = useQuery({
+    queryKey: ['featured-shops'],
+    queryFn: () => shopService.listShops({ limit: 3, sortBy: 'popular' }),
+  });
+
+  const featuredProducts = productsData?.data?.items || [];
+  const featuredShops = shopsData?.data?.items || [];
 
   return (
     <Layout>
@@ -20,17 +33,17 @@ export default function Index() {
               <Sparkles className="h-4 w-4" />
               Discover Handmade Treasures
             </span>
-            
+
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl mb-6 animate-fade-up stagger-1">
               Where <span className="text-primary">Creativity</span> Meets{' '}
               <span className="text-primary">Craftsmanship</span>
             </h1>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-up stagger-2">
-              Explore unique handmade creations from talented artisans. 
+              Explore unique handmade creations from talented artisans.
               From cozy crochet pieces to stunning original artwork.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
               <Button size="xl" asChild>
                 <Link to="/products">
@@ -109,17 +122,23 @@ export default function Index() {
             </Button>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product, index) => (
-              <div 
-                key={product.id} 
-                className="animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
+          {isProductsLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 text-center sm:hidden">
             <Button asChild>
@@ -150,7 +169,7 @@ export default function Index() {
                 description: 'Shop with confidence knowing your purchase is protected.',
               },
             ].map((item, index) => (
-              <div 
+              <div
                 key={item.title}
                 className="text-center p-8 rounded-3xl bg-card border animate-fade-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -178,17 +197,23 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {featuredShops.map((shop, index) => (
-              <div 
-                key={shop.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <ShopCard shop={shop} />
-              </div>
-            ))}
-          </div>
+          {isShopsLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {featuredShops.map((shop, index) => (
+                <div
+                  key={shop.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <ShopCard shop={shop} />
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-12 text-center">
             <Button size="lg" variant="outline" asChild>
@@ -209,7 +234,7 @@ export default function Index() {
               Start Your Artisan Journey
             </h2>
             <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Are you a creator? Join our community of talented artisans and share your 
+              Are you a creator? Join our community of talented artisans and share your
               handmade treasures with the world.
             </p>
             <Button size="xl" variant="hero" asChild>
