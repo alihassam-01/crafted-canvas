@@ -75,7 +75,7 @@ export default function Shops() {
       <div className="bg-gradient-hero py-12 lg:py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-display text-3xl md:text-4xl lg:text-5xl mb-4">
-            Meet Our Artisans
+            Meet Our Crevators
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Discover talented creators from around the world. Each shop tells a unique story

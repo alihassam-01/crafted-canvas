@@ -373,7 +373,7 @@ export default function Auth() {
               Join Our Creative Community
             </h2>
             <p className="text-muted-foreground">
-              Discover unique handmade treasures from talented artisans around the world.
+              Discover unique handmade treasures from talented crevators around the world.
               Whether you're a buyer looking for one-of-a-kind items or a creator ready to
               share your craft, you've found your home.
             </p>

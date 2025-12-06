@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 
 const stats = [
-  { value: '10K+', label: 'Artisans' },
+  { value: '10K+', label: 'Crevators' },
   { value: '50K+', label: 'Products' },
   { value: '100K+', label: 'Happy Customers' },
   { value: '25+', label: 'Countries' },
@@ -14,7 +14,7 @@ const values = [
   {
     icon: Heart,
     title: 'Made with Love',
-    description: 'Every product in our marketplace is crafted by passionate artisans who pour their heart and soul into their work.',
+    description: 'Every product in our marketplace is crafted by passionate crevators who pour their heart and soul into their work.',
   },
   {
     icon: Users,
@@ -24,7 +24,7 @@ const values = [
   {
     icon: Globe,
     title: 'Global Reach',
-    description: 'Connecting talented artisans from around the world with customers who value unique, handcrafted items.',
+    description: 'Connecting talented crevators from around the world with customers who value unique, handcrafted items.',
   },
   {
     icon: Award,
@@ -50,7 +50,7 @@ const team = [
     name: 'Emma Wilson',
     role: 'Community Manager',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300',
-    bio: 'Connecting artisans with their audience and fostering a supportive creative community.',
+    bio: 'Connecting crevators with their audience and fostering a supportive creative community.',
   },
 ];
 
@@ -69,11 +69,11 @@ export default function About() {
             <span className="text-primary">Handmade</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Artisan Market was born from a simple belief: handmade items carry 
+            Crevea was born from a simple belief: handmade items carry
             stories, passion, and a connection that mass-produced goods can never match.
           </p>
         </div>
-        
+
         {/* Decorative Elements */}
         <div className="absolute -top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
@@ -105,21 +105,21 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  We started Artisan Market in 2020 with a mission to create a 
-                  space where talented craftspeople could share their creations 
-                  with the world. What began as a small community has grown into 
-                  a vibrant marketplace connecting thousands of artisans with 
+                  We started Crevea in 2020 with a mission to create a
+                  space where talented craftspeople could share their creations
+                  with the world. What began as a small community has grown into
+                  a vibrant marketplace connecting thousands of crevators with
                   appreciative customers worldwide.
                 </p>
                 <p>
-                  We believe that every handmade item tells a story. Whether it's 
-                  a cozy crochet blanket, an original painting, or a piece of 
-                  handcrafted pottery, each creation carries the maker's passion, 
+                  We believe that every handmade item tells a story. Whether it's
+                  a cozy crochet blanket, an original painting, or a piece of
+                  handcrafted pottery, each creation carries the maker's passion,
                   skill, and unique perspective.
                 </p>
                 <p>
-                  Our goal is to make it easy for artisans to reach customers who 
-                  truly value their work, while providing buyers with a curated 
+                  Our goal is to make it easy for crevators to reach customers who
+                  truly value their work, while providing buyers with a curated
                   selection of authentic, high-quality handmade goods.
                 </p>
               </div>
@@ -128,7 +128,7 @@ export default function About() {
               <div className="aspect-square rounded-3xl overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-                  alt="Artisan crafting"
+                  alt="Crevator crafting"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -150,13 +150,13 @@ export default function About() {
           <div className="text-center mb-12">
             <h2 className="font-display text-3xl md:text-4xl mb-4">Our Values</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              The principles that guide everything we do at Artisan Market
+              The principles that guide everything we do at Crevea
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <div 
+              <div
                 key={value.title}
                 className="bg-card rounded-2xl p-6 border animate-fade-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -178,13 +178,13 @@ export default function About() {
           <div className="text-center mb-12">
             <h2 className="font-display text-3xl md:text-4xl mb-4">Meet Our Team</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              The passionate people behind Artisan Market
+              The passionate people behind Crevea
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {team.map((member, index) => (
-              <div 
+              <div
                 key={member.name}
                 className="text-center animate-fade-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -210,7 +210,7 @@ export default function About() {
             Join Our Creative Community
           </h2>
           <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-            Whether you're a creator looking to share your work or a buyer 
+            Whether you're a creator looking to share your work or a buyer
             seeking unique handmade treasures, there's a place for you here.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

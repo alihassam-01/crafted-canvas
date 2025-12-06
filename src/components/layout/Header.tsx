@@ -17,11 +17,13 @@ import { authService } from '@/services/auth.service';
 import { cartService } from '@/services/cart.service';
 
 const navigation = [
-  { name: 'Shop All', href: '/products' },
+  { name: 'Home', href: '/' },
+  { name: 'Shop', href: '/products' },
   { name: 'Crochet', href: '/products?category=crochet' },
-  { name: 'Art & Painting', href: '/products?category=painting' },
-  { name: 'Handicrafts', href: '/products?category=handicraft' },
-  { name: 'Shops', href: '/shops' },
+  { name: 'Arts/Painting', href: '/products?category=painting' },
+  { name: 'Hand Crafts', href: '/products?category=handicraft' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export function Header() {
@@ -63,25 +65,10 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-effect">
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border/20">
       <div className="container mx-auto px-4">
-        {/* Top bar */}
-        <div className="hidden lg:flex items-center justify-between py-2 text-sm border-b border-border/50">
-          <p className="text-muted-foreground">
-            ✨ Free shipping on orders over $75
-          </p>
-          <div className="flex items-center gap-4">
-            <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
-              About Us
-            </Link>
-            <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
-          </div>
-        </div>
-
         {/* Main header */}
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Mobile menu button */}
           <button
             className="lg:hidden p-2 -ml-2"
@@ -93,10 +80,7 @@ export function Header() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-warm flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-xl">A</span>
-            </div>
-            <span className="font-display text-2xl hidden sm:block">Artisan Market</span>
+            <img src="/crevea-logo.png" alt="Crevea" className="h-16 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -105,7 +89,7 @@ export function Header() {
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-foreground/80 hover:text-primary transition-colors font-medium"
+                className="text-foreground/80 hover:text-primary transition-colors font-display text-lg italic"
               >
                 {item.name}
               </Link>
@@ -114,38 +98,26 @@ export function Header() {
 
           {/* Search & Actions */}
           <div className="flex items-center gap-2 lg:gap-4">
-            {/* Desktop Search */}
-            <form onSubmit={handleSearch} className="hidden md:flex relative">
-              <Input
-                type="search"
-                placeholder="Search handmade treasures..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 lg:w-80 pl-10 bg-muted/50 border-border/50 focus:bg-background"
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            </form>
-
-            {/* Mobile Search */}
-            <Link to="/products" className="md:hidden p-2">
-              <Search className="h-5 w-5" />
-            </Link>
+            {/* Search Icon (Expandable could be added later) */}
+            <Button variant="ghost" size="icon" className="hidden md:flex" onClick={() => navigate('/products')}>
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </Button>
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="p-2 hidden sm:block">
+            <Link to="/wishlist" className="p-2 hidden sm:block text-muted-foreground hover:text-primary transition-colors">
               <Heart className="h-5 w-5" />
             </Link>
 
             {/* Messages */}
             {isLoggedIn && (
-              <Link to="/dashboard/messages" className="p-2 relative hidden sm:block">
+              <Link to="/dashboard/messages" className="p-2 relative hidden sm:block text-muted-foreground hover:text-primary transition-colors">
                 <MessageCircle className="h-5 w-5" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full" />
               </Link>
             )}
 
             {/* Cart */}
-            <Link to="/checkout" className="p-2 relative">
+            <Link to="/checkout" className="p-2 relative text-muted-foreground hover:text-primary transition-colors">
               <ShoppingBag className="h-5 w-5" />
               {cartItemCount > 0 && (
                 <Badge
@@ -161,7 +133,7 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-5 w-5" />
+                  <User className="h-5 w-5 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -200,13 +172,13 @@ export function Header() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          'lg:hidden absolute top-full left-0 right-0 bg-background border-b shadow-medium transition-all duration-300',
+          'lg:hidden absolute top-full left-0 right-0 bg-background border-b shadow-medium transition-all duration-300 z-40',
           isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         )}
       >
         <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
           {/* Mobile Search */}
-          <form onSubmit={handleSearch} className="relative mb-2">
+          <form onSubmit={handleSearch} className="relative mb-4">
             <Input
               type="search"
               placeholder="Search..."
@@ -221,27 +193,12 @@ export function Header() {
             <Link
               key={item.name}
               to={item.href}
-              className="py-2 px-3 rounded-lg hover:bg-muted transition-colors"
+              className="py-3 px-3 rounded-lg hover:bg-muted transition-colors font-display text-lg"
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
             </Link>
           ))}
-          <hr className="my-2" />
-          <Link
-            to="/about"
-            className="py-2 px-3 rounded-lg hover:bg-muted transition-colors"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className="py-2 px-3 rounded-lg hover:bg-muted transition-colors"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Contact
-          </Link>
         </nav>
       </div>
     </header>

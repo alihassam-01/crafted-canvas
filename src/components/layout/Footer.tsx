@@ -20,7 +20,7 @@ const footerLinks = {
   ],
   company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Our Artisans', href: '/shops' },
+    { name: 'Our Crevators', href: '/shops' },
     { name: 'Blog', href: '/blog' },
     { name: 'Careers', href: '/careers' },
     { name: 'Press', href: '/press' },
@@ -37,7 +37,7 @@ export function Footer() {
             Join Our Creative Community
           </h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Get inspired with new arrivals, artisan stories, and exclusive offers.
+            Get inspired with new arrivals, crevator stories, and exclusive offers.
           </p>
           <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <Input
@@ -59,10 +59,10 @@ export function Footer() {
               <div className="w-10 h-10 rounded-full bg-gradient-warm flex items-center justify-center">
                 <span className="text-primary-foreground font-display text-xl">A</span>
               </div>
-              <span className="font-display text-xl">Artisan Market</span>
+              <span className="font-display text-xl">Crevea</span>
             </Link>
             <p className="text-muted-foreground text-sm mb-4">
-              Connecting you with talented artisans and unique handmade treasures from around the world.
+              Connecting you with talented crevators and unique handmade treasures from around the world.
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
@@ -138,7 +138,7 @@ export function Footer() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-muted-foreground text-sm">
-              © 2024 Artisan Market. All rights reserved.
+              © 2024 Crevea. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">

@@ -26,95 +26,121 @@ export default function Index() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 text-accent-foreground text-sm font-medium mb-6 animate-fade-up">
-              <Sparkles className="h-4 w-4" />
-              Discover Handmade Treasures
-            </span>
-
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl mb-6 animate-fade-up stagger-1">
-              Where <span className="text-primary">Creativity</span> Meets{' '}
-              <span className="text-primary">Craftsmanship</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-up stagger-2">
-              Explore unique handmade creations from talented artisans.
-              From cozy crochet pieces to stunning original artwork.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
-              <Button size="xl" asChild>
-                <Link to="/products">
-                  Start Shopping
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="xl" variant="outline" asChild>
-                <Link to="/shops">Meet Our Artisans</Link>
-              </Button>
-            </div>
-          </div>
+      <section className="relative w-full overflow-hidden bg-canvas-cream">
+        {/* Watercolor Background Image */}
+        <div className="absolute inset-0 w-full h-full">
+          <img
+            src="/crevea-bg.png"
+            alt="Watercolor Background"
+            className="w-full h-full object-cover object-center opacity-90"
+          />
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute -top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
+        {/* Content Overlay */}
+        <div className="relative container mx-auto px-4 py-32 lg:py-48 flex flex-col items-center justify-center text-center z-10">
+          <div className="max-w-4xl mx-auto animate-fade-up">
+            {/* Logo/Icon above text if needed, or just text */}
+
+            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl mb-4 text-white drop-shadow-md">
+              Crevea
+            </h1>
+
+            <p className="font-sans text-lg md:text-xl lg:text-2xl text-white/90 mb-10 font-light tracking-wide drop-shadow-sm">
+              Curated Crochet, Fine Arts & Exquisite Hand Crafts
+            </p>
+
+            <Button size="xl" className="bg-soft-beige text-charcoal-slate hover:bg-white border-none shadow-lg px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105" asChild>
+              <Link to="/products">
+                Explore Collection
+              </Link>
+            </Button>
+          </div>
+        </div>
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 lg:py-24">
+      <section className="py-20 lg:py-28 bg-canvas-cream">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl mb-4">
-              Browse by Category
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Find exactly what you're looking for in our curated collections
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                to={`/products?category=${category.id}`}
-                className="group relative overflow-hidden rounded-3xl aspect-[4/3] animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            {/* Crochet Category */}
+            <div className="flex flex-col items-center group">
+              <div className="relative mb-8 w-full flex justify-center">
+                {/* Brush Stroke Background for Title */}
+                <div className="absolute inset-0 bg-berry-pink/80 transform -skew-x-12 scale-110 rounded-sm blur-[1px] opacity-90"></div>
+                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
+                  Crochet Creations
+                </h3>
+              </div>
+              <Link to="/products?category=crochet" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
                 <img
-                  src={category.image}
-                  alt={category.name}
+                  src="https://images.unsplash.com/photo-1584992236310-6eddd724a4c7?auto=format&fit=crop&q=80&w=800"
+                  alt="Crochet Creations"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-background">
-                  <h3 className="font-display text-2xl mb-1">{category.name}</h3>
-                  <p className="text-background/80 text-sm mb-2">{category.description}</p>
-                  <span className="text-sm font-medium">
-                    {category.productCount} products →
-                  </span>
-                </div>
               </Link>
-            ))}
+              <Button variant="ghost" className="mt-4 text-berry-pink hover:text-berry-pink/80 hover:bg-berry-pink/10" asChild>
+                <Link to="/products?category=crochet">View All</Link>
+              </Button>
+            </div>
+
+            {/* Art & Painting Category */}
+            <div className="flex flex-col items-center group mt-12 md:mt-0">
+              <div className="relative mb-8 w-full flex justify-center">
+                {/* Brush Stroke Background for Title */}
+                <div className="absolute inset-0 bg-royal-lavender/80 transform skew-x-12 scale-110 rounded-sm blur-[1px] opacity-90"></div>
+                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
+                  Art & Painting Gallery
+                </h3>
+              </div>
+              <Link to="/products?category=painting" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
+                <img
+                  src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800"
+                  alt="Art & Painting"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </Link>
+              <Button variant="ghost" className="mt-4 text-royal-lavender hover:text-royal-lavender/80 hover:bg-royal-lavender/10" asChild>
+                <Link to="/products?category=painting">View All</Link>
+              </Button>
+            </div>
+
+            {/* Hand Crafts Category */}
+            <div className="flex flex-col items-center group mt-12 md:mt-0">
+              <div className="relative mb-8 w-full flex justify-center">
+                {/* Brush Stroke Background for Title */}
+                <div className="absolute inset-0 bg-teal-blue/80 transform -skew-x-6 scale-110 rounded-sm blur-[1px] opacity-90"></div>
+                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
+                  Unique Hand Crafts
+                </h3>
+              </div>
+              <Link to="/products?category=handicraft" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
+                <img
+                  src="https://images.unsplash.com/photo-1605218427368-35b019b8a391?auto=format&fit=crop&q=80&w=800"
+                  alt="Hand Crafts"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </Link>
+              <Button variant="ghost" className="mt-4 text-teal-blue hover:text-teal-blue/80 hover:bg-teal-blue/10" asChild>
+                <Link to="/products?category=handicraft">View All</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 lg:py-24 bg-muted/30">
+      <section className="py-16 lg:py-24 bg-white/50">
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="font-display text-3xl md:text-4xl mb-4">
+              <h2 className="font-display text-3xl md:text-4xl mb-4 text-charcoal-slate">
                 Featured Products
               </h2>
               <p className="text-muted-foreground">
-                Handpicked treasures from our talented artisans
+                Handpicked treasures from our talented crevators
               </p>
             </div>
-            <Button variant="ghost" asChild className="hidden sm:flex">
+            <Button variant="ghost" asChild className="hidden sm:flex text-charcoal-slate">
               <Link to="/products">
                 View All
                 <ArrowRight className="h-4 w-4" />
@@ -149,14 +175,14 @@ export default function Index() {
       </section>
 
       {/* Value Props */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-canvas-cream">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: Heart,
                 title: 'Made with Love',
-                description: 'Every item is crafted by skilled artisans who pour their heart into their work.',
+                description: 'Every item is crafted by skilled crevators who pour their heart into their work.',
               },
               {
                 icon: Package,
@@ -171,13 +197,13 @@ export default function Index() {
             ].map((item, index) => (
               <div
                 key={item.title}
-                className="text-center p-8 rounded-3xl bg-card border animate-fade-up"
+                className="text-center p-8 rounded-3xl bg-white/80 border border-border/50 shadow-sm animate-fade-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-hero flex items-center justify-center">
-                  <item.icon className="h-8 w-8 text-primary" />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-soft-beige flex items-center justify-center text-charcoal-slate">
+                  <item.icon className="h-8 w-8" />
                 </div>
-                <h3 className="font-display text-xl mb-3">{item.title}</h3>
+                <h3 className="font-display text-xl mb-3 text-charcoal-slate">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
               </div>
             ))}
@@ -186,11 +212,14 @@ export default function Index() {
       </section>
 
       {/* Featured Shops */}
-      <section className="py-16 lg:py-24 bg-gradient-hero">
-        <div className="container mx-auto px-4">
+      <section className="py-16 lg:py-24 relative overflow-hidden">
+        {/* Background Wash */}
+        <div className="absolute inset-0 bg-gradient-hero opacity-30"></div>
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl mb-4">
-              Meet Our Artisans
+            <h2 className="font-display text-3xl md:text-4xl mb-4 text-charcoal-slate">
+              Meet Our Crevators
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Discover the creative minds behind the handmade magic
@@ -216,7 +245,7 @@ export default function Index() {
           )}
 
           <div className="mt-12 text-center">
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" className="bg-white/80 border-charcoal-slate/20 hover:bg-white" asChild>
               <Link to="/shops">
                 Explore All Shops
                 <ArrowRight className="h-4 w-4" />
@@ -227,17 +256,17 @@ export default function Index() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-canvas-cream">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-warm p-8 md:p-12 lg:p-16 text-center text-primary-foreground">
+          <div className="relative overflow-hidden rounded-3xl bg-charcoal-slate p-8 md:p-12 lg:p-16 text-center text-white">
             <h2 className="font-display text-3xl md:text-4xl mb-4">
-              Start Your Artisan Journey
+              Become A Crevator
             </h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Are you a creator? Join our community of talented artisans and share your
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              Are you a creator? Join our community of talented crevators and share your
               handmade treasures with the world.
             </p>
-            <Button size="xl" variant="hero" asChild>
+            <Button size="xl" className="bg-berry-pink hover:bg-berry-pink/90 text-white border-none" asChild>
               <Link to="/auth?mode=register&type=vendor">
                 Open Your Shop
                 <ArrowRight className="h-5 w-5" />
@@ -245,8 +274,8 @@ export default function Index() {
             </Button>
 
             {/* Decorative circles */}
-            <div className="absolute -top-10 -left-10 w-40 h-40 bg-background/10 rounded-full" />
-            <div className="absolute -bottom-10 -right-10 w-60 h-60 bg-background/10 rounded-full" />
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 rounded-full" />
+            <div className="absolute -bottom-10 -right-10 w-60 h-60 bg-white/5 rounded-full" />
           </div>
         </div>
       </section>

@@ -17,7 +17,7 @@ export default {
         sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         display: ['Playfair Display', 'Georgia', 'serif'],
       },
-      colors: {
+        colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -61,27 +61,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom artistic colors
-        terracotta: {
-          DEFAULT: "hsl(var(--terracotta))",
-          light: "hsl(var(--terracotta-light))",
-          dark: "hsl(var(--terracotta-dark))",
-        },
-        sage: {
-          DEFAULT: "hsl(var(--sage))",
-          light: "hsl(var(--sage-light))",
-          dark: "hsl(var(--sage-dark))",
-        },
-        cream: {
-          DEFAULT: "hsl(var(--cream))",
-          dark: "hsl(var(--cream-dark))",
-        },
-        "dusty-rose": {
-          DEFAULT: "hsl(var(--dusty-rose))",
-          light: "hsl(var(--dusty-rose-light))",
-        },
-        burgundy: "hsl(var(--burgundy))",
-        teal: "hsl(var(--teal))",
+        // Custom artistic colors - Watercolor Palette
+        "berry-pink": "hsl(var(--berry-pink))",
+        "royal-lavender": "hsl(var(--royal-lavender))",
+        "teal-blue": "hsl(var(--teal-blue))",
+        "canvas-cream": "hsl(var(--canvas-cream))",
+        "charcoal-slate": "hsl(var(--charcoal-slate))",
+        "warm-grey": "hsl(var(--warm-grey))",
+        "soft-beige": "hsl(var(--soft-beige))",
       },
       borderRadius: {
         lg: "var(--radius)",

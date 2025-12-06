@@ -77,7 +77,7 @@ export const mockShops: Shop[] = [
     id: '3',
     name: 'Handmade Haven',
     slug: 'handmade-haven',
-    description: 'Unique handicrafts from around the world. Supporting artisans and traditional craftsmanship.',
+    description: 'Unique handicrafts from around the world. Supporting crevators and traditional craftsmanship.',
     logo: 'https://images.unsplash.com/photo-1528396518501-b53b655eb9b3?w=200',
     banner: 'https://images.unsplash.com/photo-1528396518501-b53b655eb9b3?w=1200',
     ownerId: '2',
