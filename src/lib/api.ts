@@ -2,15 +2,15 @@ import { ApiResponse } from '@/types/api';
 
 const PORTS = {
   auth: 3001,
-  shop: 3002,
-  product: 3003,
-  order: 3004,
+  shops: 3002,
+  products: 3003,
+  orders: 3004,
   cart: 3004,
-  payment: 3005,
-  notification: 3006,
-  review: 3008,
+  payments: 3005,
+  notifications: 3006,
+  reviews: 3008,
   admin: 3009,
-  promotion: 3010,
+  promotions: 3010,
 };
 
 const BASE_URL = 'http://localhost';
@@ -56,7 +56,7 @@ class ApiClient {
     if (!this.refreshToken) return false;
 
     try {
-      const response = await fetch(`${BASE_URL}:${PORTS.auth}/auth/refresh`, {
+      const response = await fetch(`/api/auth/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: this.refreshToken }),
@@ -82,7 +82,7 @@ class ApiClient {
     endpoint: string,
     options: RequestOptions = {}
   ): Promise<ApiResponse<T>> {
-    const url = new URL(`${BASE_URL}:${PORTS[service]}${endpoint}`);
+    const url = new URL(`/api/${service}${endpoint}`, window.location.origin);
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, value]) => {

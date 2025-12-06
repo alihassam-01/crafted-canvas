@@ -1,32 +1,48 @@
 import { Link } from 'react-router-dom';
-import { Package, ChevronRight, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Package, ChevronRight, Truck, CheckCircle, Clock, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockOrders } from '@/data/mockData';
-import { OrderStatus } from '@/types';
 import { cn } from '@/lib/utils';
+import { orderService } from '@/services/order.service';
 
-const statusConfig: Record<OrderStatus, { icon: typeof Package; color: string; label: string }> = {
-  pending: { icon: Clock, color: 'text-yellow-500', label: 'Pending' },
-  confirmed: { icon: CheckCircle, color: 'text-blue-500', label: 'Confirmed' },
-  processing: { icon: Package, color: 'text-purple-500', label: 'Processing' },
-  shipped: { icon: Truck, color: 'text-primary', label: 'Shipped' },
-  delivered: { icon: CheckCircle, color: 'text-sage-dark', label: 'Delivered' },
-  cancelled: { icon: XCircle, color: 'text-destructive', label: 'Cancelled' },
+const statusConfig: Record<string, { icon: typeof Package; color: string; label: string }> = {
+  PENDING: { icon: Clock, color: 'text-yellow-500', label: 'Pending' },
+  CONFIRMED: { icon: CheckCircle, color: 'text-blue-500', label: 'Confirmed' },
+  PROCESSING: { icon: Package, color: 'text-purple-500', label: 'Processing' },
+  SHIPPED: { icon: Truck, color: 'text-primary', label: 'Shipped' },
+  DELIVERED: { icon: CheckCircle, color: 'text-sage-dark', label: 'Delivered' },
+  CANCELLED: { icon: XCircle, color: 'text-destructive', label: 'Cancelled' },
+  REFUNDED: { icon: XCircle, color: 'text-destructive', label: 'Refunded' },
 };
 
 export default function Orders() {
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ['my-orders-full'],
+    queryFn: () => orderService.listOrders({ limit: 50 }),
+  });
+
+  const orders = ordersData?.data?.items || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl">My Orders</h1>
-        <Badge variant="secondary">{mockOrders.length} orders</Badge>
+        <Badge variant="secondary">{ordersData?.data?.pagination?.total || 0} orders</Badge>
       </div>
 
-      {mockOrders.length > 0 ? (
+      {orders.length > 0 ? (
         <div className="space-y-4">
-          {mockOrders.map((order) => {
-            const status = statusConfig[order.status];
+          {orders.map((order) => {
+            const status = statusConfig[order.status] || statusConfig.PENDING;
             const StatusIcon = status.icon;
 
             return (
@@ -42,7 +58,7 @@ export default function Orders() {
                       </p>
                     </div>
                   </div>
-                  <Badge variant={order.status === 'delivered' ? 'success' : 'secondary'}>
+                  <Badge variant={order.status === 'DELIVERED' ? 'success' : 'secondary'}>
                     {status.label}
                   </Badge>
                 </div>
@@ -50,28 +66,28 @@ export default function Orders() {
                 {/* Order Items */}
                 <div className="p-4">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
-                      <Link to={`/products/${item.product.slug}`}>
+                    <div key={item.productId} className="flex gap-4">
+                      <Link to={`/products/${item.productId}`}>
                         <img
-                          src={item.product.images[0]?.url}
-                          alt={item.product.name}
+                          src={item.image || '/placeholder-product.jpg'}
+                          alt={item.name}
                           className="w-20 h-20 rounded-lg object-cover"
                         />
                       </Link>
                       <div className="flex-1">
-                        <Link 
-                          to={`/products/${item.product.slug}`}
+                        <Link
+                          to={`/products/${item.productId}`}
                           className="font-medium hover:text-primary transition-colors"
                         >
-                          {item.product.name}
+                          {item.name}
                         </Link>
-                        <p className="text-sm text-muted-foreground">
+                        {/* <p className="text-sm text-muted-foreground">
                           {item.product.shop.name}
-                        </p>
+                        </p> */}
                         <p className="text-sm text-muted-foreground">
                           Qty: {item.quantity}
-                          {item.size && ` • Size: ${item.size}`}
-                          {item.color && ` • Color: ${item.color}`}
+                          {/* {item.size && ` • Size: ${item.size}`}
+                          {item.color && ` • Color: ${item.color}`} */}
                         </p>
                         <p className="font-medium mt-1">${item.price.toFixed(2)}</p>
                       </div>
@@ -86,11 +102,11 @@ export default function Orders() {
                     <p className="text-xl font-bold">${order.total.toFixed(2)}</p>
                   </div>
                   <div className="flex gap-2">
-                    {order.trackingNumber && (
+                    {/* {order.trackingNumber && (
                       <Button variant="outline" size="sm">
                         Track Order
                       </Button>
-                    )}
+                    )} */}
                     <Button variant="outline" size="sm">
                       View Details
                       <ChevronRight className="h-4 w-4" />

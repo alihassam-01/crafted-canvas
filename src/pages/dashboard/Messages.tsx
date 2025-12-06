@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Send, Search, MoreVertical } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Send, Search, MoreVertical, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockConversations, mockMessages, mockUsers } from '@/data/mockData';
+import { mockConversations, mockMessages } from '@/data/mockData';
 import { Conversation, Message } from '@/types';
 import { cn } from '@/lib/utils';
+import { authService } from '@/services/auth.service';
 
 export default function Messages() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
@@ -14,7 +16,23 @@ export default function Messages() {
   );
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>(mockMessages);
-  const currentUser = mockUsers[0];
+
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ['user'],
+    queryFn: authService.getCurrentUser,
+  });
+
+  const currentUser = userData?.data;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!currentUser) return null;
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +42,7 @@ export default function Messages() {
       id: Date.now().toString(),
       conversationId: selectedConversation.id,
       senderId: currentUser.id,
-      sender: currentUser,
+      sender: currentUser as any, // Type mismatch between API User and Mock User, casting for now
       content: newMessage,
       isRead: false,
       createdAt: new Date().toISOString(),
@@ -35,6 +53,7 @@ export default function Messages() {
   };
 
   const getOtherParticipant = (conversation: Conversation) => {
+    // Fallback to first participant if current user is not found (e.g. mock conversation)
     return conversation.participants.find(p => p.id !== currentUser.id) || conversation.participants[0];
   };
 
@@ -129,7 +148,7 @@ export default function Messages() {
               {messages
                 .filter(m => m.conversationId === selectedConversation.id)
                 .map((message) => {
-                  const isOwn = message.senderId === currentUser.id;
+                  const isOwn = message.senderId === currentUser.id || message.senderId === '1'; // Fallback for mock data
 
                   return (
                     <div

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Search, ShoppingBag, User, Menu, X, Heart, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { authService } from '@/services/auth.service';
+import { cartService } from '@/services/cart.service';
 
 const navigation = [
   { name: 'Shop All', href: '/products' },
@@ -25,13 +28,37 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const cartItemCount = 2; // Mock count
-  const isLoggedIn = true; // Mock state
+
+  const { data: userData } = useQuery({
+    queryKey: ['user'],
+    queryFn: authService.getCurrentUser,
+    retry: false,
+  });
+
+  const isLoggedIn = !!userData?.data;
+
+  const { data: cartData } = useQuery({
+    queryKey: ['cart'],
+    queryFn: cartService.getCart,
+    enabled: isLoggedIn,
+    retry: false,
+  });
+
+  const cartItemCount = cartData?.data?.itemCount || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Logout failed', error);
     }
   };
 
@@ -121,8 +148,8 @@ export function Header() {
             <Link to="/checkout" className="p-2 relative">
               <ShoppingBag className="h-5 w-5" />
               {cartItemCount > 0 && (
-                <Badge 
-                  variant="default" 
+                <Badge
+                  variant="default"
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
                   {cartItemCount}
@@ -150,8 +177,8 @@ export function Header() {
                       <Link to="/dashboard/messages">Messages</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/auth">Sign Out</Link>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Sign Out
                     </DropdownMenuItem>
                   </>
                 ) : (
@@ -189,7 +216,7 @@ export function Header() {
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </form>
-          
+
           {navigation.map((item) => (
             <Link
               key={item.name}

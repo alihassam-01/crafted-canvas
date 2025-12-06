@@ -16,6 +16,9 @@ import Payment from "./pages/Payment";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/dashboard/Orders";
 import Messages from "./pages/dashboard/Messages";
+import SellerShop from "./pages/dashboard/SellerShop";
+import CreateShop from "./pages/dashboard/CreateShop";
+import AddProduct from "./pages/dashboard/AddProduct";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -40,6 +43,9 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />}>
             <Route path="orders" element={<Orders />} />
             <Route path="messages" element={<Messages />} />
+            <Route path="shop" element={<SellerShop />} />
+            <Route path="shop/create" element={<CreateShop />} />
+            <Route path="shop/add-product" element={<AddProduct />} />
           </Route>
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />

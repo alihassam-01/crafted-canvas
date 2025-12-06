@@ -15,15 +15,15 @@ export interface Promotion {
 
 export const promotionService = {
   listPromotions: async (params: any): Promise<ApiResponse<PaginatedResponse<Promotion>>> => {
-    return api.request<PaginatedResponse<Promotion>>('promotion', '/promotion', { params });
+    return api.request<PaginatedResponse<Promotion>>('promotions', '', { params });
   },
 
   getPromotion: async (id: string): Promise<ApiResponse<Promotion>> => {
-    return api.request<Promotion>('promotion', `/promotion/${id}`);
+    return api.request<Promotion>('promotions', `/${id}`);
   },
 
   validatePromotion: async (code: string, cartTotal: number): Promise<ApiResponse<Promotion>> => {
-    return api.request<Promotion>('promotion', '/promotion/validate', {
+    return api.request<Promotion>('promotions', '/validate', {
       method: 'POST',
       body: JSON.stringify({ code, cartTotal }),
     });
