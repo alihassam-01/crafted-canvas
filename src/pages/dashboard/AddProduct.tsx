@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,10 +26,13 @@ const categories = [
 
 export default function AddProduct() {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const isEditMode = !!id;
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [images, setImages] = useState<string[]>([]);
     const [imageUrl, setImageUrl] = useState('');
+    const [category, setCategory] = useState('');
 
     const { data: userData } = useQuery({
         queryKey: ['user'],
@@ -48,6 +51,21 @@ export default function AddProduct() {
     });
 
     const shop = shopData;
+
+    const { data: productData, isLoading: isProductLoading } = useQuery({
+        queryKey: ['product', id],
+        queryFn: () => productService.getProduct(id!),
+        enabled: isEditMode,
+    });
+
+    const product = productData?.data;
+
+    useEffect(() => {
+        if (product && isEditMode) {
+            setImages(product.images || []);
+            setCategory(product.category || '');
+        }
+    }, [product, isEditMode]);
 
     const handleAddImage = () => {
         if (imageUrl && !images.includes(imageUrl)) {
@@ -80,7 +98,7 @@ export default function AddProduct() {
             shortDescription: formData.get('shortDescription'),
             price: parseFloat(formData.get('price') as string),
             stock: parseInt(formData.get('stock') as string),
-            category: formData.get('category'),
+            category: category,
             images: images,
             shopId: shop.id,
             status: 'ACTIVE', // Default to active for now
@@ -88,17 +106,25 @@ export default function AddProduct() {
         };
 
         try {
-            await productService.createProduct(productData);
-            toast({
-                title: 'Success',
-                description: 'Product created successfully',
-            });
+            if (isEditMode && id) {
+                await productService.updateProduct(id, productData);
+                toast({
+                    title: 'Success',
+                    description: 'Product updated successfully',
+                });
+            } else {
+                await productService.createProduct(productData);
+                toast({
+                    title: 'Success',
+                    description: 'Product created successfully',
+                });
+            }
             navigate('/dashboard/shop');
         } catch (error) {
-            console.error('Failed to create product:', error);
+            console.error('Failed to save product:', error);
             toast({
                 title: 'Error',
-                description: 'Failed to create product. Please try again.',
+                description: `Failed to ${isEditMode ? 'update' : 'create'} product. Please try again.`,
                 variant: 'destructive',
             });
         } finally {
@@ -106,12 +132,20 @@ export default function AddProduct() {
         }
     };
 
+    if (isEditMode && isProductLoading) {
+        return (
+            <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-2xl mx-auto">
             <div className="mb-8">
-                <h1 className="font-display text-2xl mb-2">Add New Product</h1>
+                <h1 className="font-display text-2xl mb-2">{isEditMode ? 'Edit Product' : 'Add New Product'}</h1>
                 <p className="text-muted-foreground">
-                    Fill in the details to list your new product.
+                    {isEditMode ? 'Update your product details.' : 'Fill in the details to list your new product.'}
                 </p>
             </div>
 
@@ -119,12 +153,12 @@ export default function AddProduct() {
                 <div className="space-y-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Product Name</Label>
-                        <Input id="name" name="name" required placeholder="e.g. Handmade Wool Scarf" />
+                        <Input id="name" name="name" required placeholder="e.g. Handmade Wool Scarf" defaultValue={product?.name} />
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="shortDescription">Short Description</Label>
-                        <Input id="shortDescription" name="shortDescription" required placeholder="Brief summary for cards" />
+                        <Input id="shortDescription" name="shortDescription" required placeholder="Brief summary for cards" defaultValue={product?.shortDescription} />
                     </div>
 
                     <div className="grid gap-2">
@@ -135,23 +169,24 @@ export default function AddProduct() {
                             required
                             placeholder="Detailed description of your product..."
                             className="min-h-[150px]"
+                            defaultValue={product?.description}
                         />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="price">Price ($)</Label>
-                            <Input id="price" name="price" type="number" min="0" step="0.01" required placeholder="0.00" />
+                            <Input id="price" name="price" type="number" min="0" step="0.01" required placeholder="0.00" defaultValue={product?.price} />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="stock">Stock</Label>
-                            <Input id="stock" name="stock" type="number" min="0" required placeholder="1" />
+                            <Input id="stock" name="stock" type="number" min="0" required placeholder="1" defaultValue={product?.stock} />
                         </div>
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="category">Category</Label>
-                        <Select name="category" required>
+                        <Select name="category" required value={category} onValueChange={setCategory}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
@@ -206,7 +241,7 @@ export default function AddProduct() {
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create Product
+                        {isEditMode ? 'Update Product' : 'Create Product'}
                     </Button>
                 </div>
             </form>

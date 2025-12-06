@@ -32,7 +32,8 @@ export default function SellerShop() {
         enabled: !!shop,
     });
 
-    const products = productsData?.data?.items || [];
+    // Handle different response structures (direct array, inside data, or inside products property)
+    const products = (productsData as any)?.products || (productsData as any)?.data?.products || (productsData as any)?.data?.items || [];
 
     if (isShopLoading) {
         return (
@@ -100,8 +101,10 @@ export default function SellerShop() {
                                     <Badge variant={product.status === 'ACTIVE' ? 'success' : 'secondary'}>
                                         {product.status}
                                     </Badge>
-                                    <Button variant="ghost" size="icon">
-                                        <Edit className="h-4 w-4" />
+                                    <Button variant="ghost" size="icon" asChild>
+                                        <Link to={`/dashboard/shop/edit-product/${product.id}`}>
+                                            <Edit className="h-4 w-4" />
+                                        </Link>
                                     </Button>
                                     <Button variant="ghost" size="icon" className="text-destructive">
                                         <Trash2 className="h-4 w-4" />
