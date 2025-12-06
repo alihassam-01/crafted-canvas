@@ -25,11 +25,41 @@ export const productService = {
   },
 
   listProducts: async (params: any): Promise<ApiResponse<PaginatedResponse<Product>>> => {
-    return api.request<PaginatedResponse<Product>>('products', '', { params });
+    const response = await api.request<any>('products', '', { params }) as any;
+    if (response.products) {
+      return {
+        success: true,
+        data: {
+          items: response.products,
+          pagination: {
+            page: 1,
+            limit: response.products.length,
+            total: response.products.length,
+            totalPages: 1
+          }
+        }
+      };
+    }
+    return response;
   },
 
   getShopProducts: async (shopId: string, params: any): Promise<ApiResponse<PaginatedResponse<Product>>> => {
-    return api.request<PaginatedResponse<Product>>('products', `/shop/${shopId}`, { params });
+    const response = await api.request<any>('products', `/shop/${shopId}`, { params }) as any;
+    if (response.products) {
+      return {
+        success: true,
+        data: {
+          items: response.products,
+          pagination: {
+            page: 1,
+            limit: response.products.length,
+            total: response.products.length,
+            totalPages: 1
+          }
+        }
+      };
+    }
+    return response;
   },
 
   updateInventory: async (id: string, data: { stock: number; lowStockThreshold?: number }): Promise<ApiResponse<any>> => {

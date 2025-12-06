@@ -71,10 +71,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Product Info */}
       <div className="mt-4 space-y-2">
         <Link
-          to={`/shops/${product.shop.id}`}
+          to={`/shops/${product?.shop?.id}`}
           className="text-xs text-muted-foreground hover:text-primary transition-colors"
         >
-          {product.shop.name}
+          {product?.shop?.name}
         </Link>
 
         <Link to={`/products/${product.slug}`}>

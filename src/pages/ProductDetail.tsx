@@ -72,6 +72,8 @@ export default function ProductDetail() {
   const reviews = reviewsData?.data?.items || [];
   const relatedProducts = relatedData?.data?.items?.filter(p => p.id !== product?.id).slice(0, 4) || [];
 
+  console.log('Product Details:', product);
+
   if (isProductLoading) {
     return (
       <Layout>
@@ -183,15 +185,15 @@ export default function ProductDetail() {
           <div className="space-y-6">
             {/* Shop Link */}
             <Link
-              to={`/shops/${product.shop.id}`}
+              to={`/shops/${product?.shop?.id}`}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               <img
-                src={product.shop.logo || '/placeholder-shop.jpg'}
-                alt={product.shop.name}
+                src={product?.shop?.logo || '/placeholder-shop.jpg'}
+                alt={product?.shop?.name}
                 className="w-6 h-6 rounded-full object-cover"
               />
-              {product.shop.name}
+              {product?.shop?.name}
               {/* Verification status not in product.shop, fetch shop if needed or ignore */}
             </Link>
 

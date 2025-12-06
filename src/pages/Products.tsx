@@ -44,27 +44,31 @@ const sortOptions = [
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
 
-  const categoryParam = searchParams.get('category') as ProductCategory | null;
+  // Parse initial categories from URL
+  const categoryParams = searchParams.getAll('category');
+  const initialCategories = categoryParams
+    .map(param => categories.find(c => c.id.toLowerCase() === param.toLowerCase())?.id)
+    .filter((c): c is ProductCategory => !!c);
+
   const searchParam = searchParams.get('search') || '';
   const sortParam = searchParams.get('sort') || 'newest';
 
   const [filters, setFilters] = useState<ProductFilters>({
-    category: categoryParam || undefined,
+    category: initialCategories.length > 0 ? initialCategories : undefined,
     sortBy: sortParam as ProductFilters['sortBy'],
-    inStock: true,
+    inStock: false, // Default to showing all products
     isHandmade: false,
   });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', filters.category, searchParam, priceRange, filters.sortBy],
+    queryKey: ['products', searchParam, priceRange, filters.sortBy],
     queryFn: () => productService.listProducts({
-      category: filters.category,
       search: searchParam,
       minPrice: priceRange[0],
       maxPrice: priceRange[1],
-      limit: 100, // Fetch more for client-side sorting if needed
+      limit: 100,
     }),
   });
 
@@ -72,15 +76,20 @@ export default function Products() {
     if (!data?.data?.items) return [];
     let result = [...data.data.items];
 
-    // In stock filter (Client side)
-    if (filters.inStock) {
-      result = result.filter(p => p.stock > 0);
+    // Category filter (Client side - Case Insensitive, Multiple)
+    if (filters.category && Array.isArray(filters.category) && filters.category.length > 0) {
+      const selectedCategories = filters.category.map(c => c.toLowerCase());
+      result = result.filter(p => selectedCategories.includes(p.category.toLowerCase()));
     }
 
-    // Handmade filter (Client side - assuming all are handmade or based on category/tags)
+    // In stock filter (Client side)
+    if (filters.inStock) {
+      result = result.filter(p => (p.stock || 0) > 0);
+    }
+
+    // Handmade filter (Client side)
     if (filters.isHandmade) {
-      // API doesn't have isHandmade, maybe check tags?
-      result = result.filter(p => p.tags.includes('handmade'));
+      result = result.filter(p => p.tags?.includes('handmade'));
     }
 
     // Sorting (Client side if API doesn't support all)
@@ -105,19 +114,41 @@ export default function Products() {
     return result;
   }, [data, filters]);
 
+  console.log('Displayed products:', filteredProducts);
+
   const activeFiltersCount = [
-    filters.category,
+    filters.category && (filters.category as ProductCategory[]).length > 0,
     filters.isHandmade,
-    priceRange[0] > 0 || priceRange[1] < 500,
+    priceRange[0] > 0 || priceRange[1] < 10000,
   ].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilters({
       sortBy: 'newest',
-      inStock: true,
+      inStock: false,
+      category: [],
     });
-    setPriceRange([0, 500]);
+    setPriceRange([0, 10000]);
     setSearchParams({});
+  };
+
+  const toggleCategory = (categoryId: ProductCategory) => {
+    setFilters(prev => {
+      const currentCategories = (prev.category as ProductCategory[]) || [];
+      const isSelected = currentCategories.includes(categoryId);
+
+      let newCategories;
+      if (isSelected) {
+        newCategories = currentCategories.filter(c => c !== categoryId);
+      } else {
+        newCategories = [...currentCategories, categoryId];
+      }
+
+      return {
+        ...prev,
+        category: newCategories.length > 0 ? newCategories : undefined
+      };
+    });
   };
 
   const FilterContent = () => (
@@ -132,13 +163,8 @@ export default function Products() {
               className="flex items-center gap-3 cursor-pointer"
             >
               <Checkbox
-                checked={filters.category === cat.id}
-                onCheckedChange={(checked) =>
-                  setFilters(f => ({
-                    ...f,
-                    category: checked ? cat.id as ProductCategory : undefined,
-                  }))
-                }
+                checked={(filters.category as ProductCategory[] || []).includes(cat.id)}
+                onCheckedChange={() => toggleCategory(cat.id)}
               />
               <span className="text-sm">{cat.name}</span>
             </label>
@@ -149,13 +175,15 @@ export default function Products() {
       {/* Price Range */}
       <div>
         <h4 className="font-semibold mb-3">Price Range</h4>
-        <Slider
-          value={priceRange}
-          onValueChange={setPriceRange}
-          max={500}
-          step={10}
-          className="mb-3"
-        />
+        <div className="px-2">
+          <Slider
+            value={priceRange}
+            onValueChange={setPriceRange}
+            max={10000}
+            // step={1}
+            className="mb-3"
+          />
+        </div>
         <div className="flex items-center gap-2 text-sm">
           <Input
             type="number"
@@ -213,11 +241,7 @@ export default function Products() {
       <div className="bg-gradient-hero py-12">
         <div className="container mx-auto px-4">
           <h1 className="font-display text-3xl md:text-4xl mb-2">
-            {categoryParam
-              ? categories.find(c => c.id === categoryParam)?.name || 'Products'
-              : searchParam
-                ? `Search: "${searchParam}"`
-                : 'All Products'}
+            {searchParam ? `Search: "${searchParam}"` : 'All Products'}
           </h1>
           <p className="text-muted-foreground">
             {filteredProducts.length} products found
@@ -267,14 +291,14 @@ export default function Products() {
 
               {/* Active Filters */}
               <div className="hidden lg:flex items-center gap-2 flex-wrap flex-1">
-                {filters.category && (
-                  <Badge variant="secondary" className="gap-1">
-                    {categories.find(c => c.id === filters.category)?.name}
-                    <button onClick={() => setFilters(f => ({ ...f, category: undefined }))}>
+                {filters.category && Array.isArray(filters.category) && filters.category.map(catId => (
+                  <Badge key={catId} variant="secondary" className="gap-1">
+                    {categories.find(c => c.id === catId)?.name}
+                    <button onClick={() => toggleCategory(catId)}>
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
-                )}
+                ))}
               </div>
 
               {/* Sort */}
@@ -330,4 +354,3 @@ export default function Products() {
     </Layout>
   );
 }
-

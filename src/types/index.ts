@@ -5,7 +5,7 @@ import { Shop, Product, User } from './api';
 export type ProductCategory = 'CROCHET' | 'ART' | 'PAINTING' | 'HANDCRAFT';
 
 export interface ProductFilters {
-  category?: ProductCategory;
+  category?: ProductCategory | ProductCategory[];
   minPrice?: number;
   maxPrice?: number;
   rating?: number;
