@@ -363,7 +363,7 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* Right Side - Decorative */}
+        {/* Right Side - Decorative  */}
         <div className="hidden lg:flex flex-1 bg-gradient-hero items-center justify-center p-12">
           <div className="max-w-md text-center">
             <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-warm flex items-center justify-center">

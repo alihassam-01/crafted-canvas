@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
+import {
   ArrowLeft, CreditCard, Lock, Check, ChevronRight,
-  MapPin, Truck
+  MapPin, Truck, Loader2, ShoppingBag, Banknote
 } from 'lucide-react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,22 +13,64 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockCartItems } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import { cartService } from '@/services/cart.service';
+import { orderService } from '@/services/order.service';
+import type { Address, PaymentMethod } from '@/types/api';
 
 export default function Payment() {
   const navigate = useNavigate();
   const [step, setStep] = useState<'shipping' | 'payment' | 'review'>('shipping');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CARD');
 
-  const subtotal = mockCartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
-  const shipping = subtotal > 75 ? 0 : 9.99;
+  // Form state
+  const [shippingAddress, setShippingAddress] = useState<Address>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    street: '',
+    apartment: '',
+    city: '',
+    state: '',
+    country: '',
+    postalCode: '',
+  });
+
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [shippingMethod, setShippingMethod] = useState('standard');
+
+  // Fetch cart data
+  const { data: cartData, isLoading: isLoadingCart } = useQuery({
+    queryKey: ['cart'],
+    queryFn: cartService.getCart,
+    retry: false,
+  });
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: orderService.createOrder,
+    onSuccess: (response) => {
+      toast.success('Order placed successfully!');
+      navigate(`/dashboard/orders`);
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || 'Failed to create order');
+    },
+  });
+
+  const cart = cartData?.data;
+  const cartItems = cart?.items || [];
+
+  // Calculate totals from cart
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = subtotal > 75 ? 0 : (shippingMethod === 'express' ? 19.99 : 9.99);
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  const handleInputChange = (field: keyof Address, value: string) => {
+    setShippingAddress(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,11 +79,11 @@ export default function Payment() {
     } else if (step === 'payment') {
       setStep('review');
     } else {
-      setIsProcessing(true);
-      setTimeout(() => {
-        setIsProcessing(false);
-        navigate('/dashboard/orders');
-      }, 2000);
+      // Create order
+      createOrderMutation.mutate({
+        shippingAddress,
+        paymentMethod,
+      });
     }
   };
 
@@ -49,11 +93,40 @@ export default function Payment() {
     { id: 'review', label: 'Review' },
   ];
 
+  // Loading state
+  if (isLoadingCart) {
+    return (
+      <Layout showFooter={false}>
+        <div className="container mx-auto px-4 py-20 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Empty cart state
+  if (!cart || cartItems.length === 0) {
+    return (
+      <Layout showFooter={false}>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <ShoppingBag className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+          <h1 className="font-display text-3xl mb-4">Your Cart is Empty</h1>
+          <p className="text-muted-foreground mb-8">
+            Please add items to your cart before proceeding to checkout.
+          </p>
+          <Button asChild size="lg">
+            <Link to="/products">Start Shopping</Link>
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout showFooter={false}>
       <div className="container mx-auto px-4 py-8">
-        <Link 
-          to="/checkout" 
+        <Link
+          to="/checkout"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -70,8 +143,8 @@ export default function Payment() {
                   step === s.id
                     ? 'border-primary bg-primary text-primary-foreground'
                     : steps.findIndex(st => st.id === step) > index
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-muted text-muted-foreground'
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-muted text-muted-foreground'
                 )}
               >
                 {steps.findIndex(st => st.id === step) > index ? (
@@ -110,46 +183,112 @@ export default function Payment() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required />
+                      <Input
+                        id="firstName"
+                        value={shippingAddress.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required />
+                      <Input
+                        id="lastName"
+                        value={shippingAddress.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={shippingAddress.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={shippingAddress.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="address">Street Address</Label>
-                    <Input id="address" required />
+                    <Input
+                      id="address"
+                      value={shippingAddress.street}
+                      onChange={(e) => handleInputChange('street', e.target.value)}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="apartment">Apartment, suite, etc. (optional)</Label>
-                    <Input id="apartment" />
+                    <Input
+                      id="apartment"
+                      value={shippingAddress.apartment}
+                      onChange={(e) => handleInputChange('apartment', e.target.value)}
+                    />
                   </div>
 
                   <div className="grid sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
-                      <Input id="city" required />
+                      <Input
+                        id="city"
+                        value={shippingAddress.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="state">State</Label>
-                      <Input id="state" required />
+                      <Input
+                        id="state"
+                        value={shippingAddress.state}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="zip">ZIP Code</Label>
-                      <Input id="zip" required />
+                      <Input
+                        id="zip"
+                        value={shippingAddress.postalCode}
+                        onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" required />
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      value={shippingAddress.country}
+                      onChange={(e) => handleInputChange('country', e.target.value)}
+                      required
+                    />
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Checkbox id="saveAddress" />
+                    <Checkbox
+                      id="saveAddress"
+                      checked={saveAddress}
+                      onCheckedChange={(checked) => setSaveAddress(checked === true)}
+                    />
                     <label htmlFor="saveAddress" className="text-sm">
                       Save this address for future orders
                     </label>
@@ -162,7 +301,7 @@ export default function Payment() {
                     <h3 className="font-display text-xl">Shipping Method</h3>
                   </div>
 
-                  <RadioGroup defaultValue="standard">
+                  <RadioGroup value={shippingMethod} onValueChange={setShippingMethod}>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
                         <RadioGroupItem value="standard" id="standard" />
@@ -175,8 +314,8 @@ export default function Payment() {
                           </p>
                         </div>
                       </div>
-                      <span className={cn(shipping === 0 ? 'text-sage-dark font-medium' : '')}>
-                        {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
+                      <span className={cn(subtotal > 75 && shippingMethod === 'standard' && 'text-sage-dark font-medium')}>
+                        {subtotal > 75 && shippingMethod === 'standard' ? 'FREE' : `Rs. ${(9.99).toFixed(2)}`}
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-4 border rounded-lg mt-3">
@@ -191,7 +330,7 @@ export default function Payment() {
                           </p>
                         </div>
                       </div>
-                      <span>$19.99</span>
+                      <span>Rs. 19.99</span>
                     </div>
                   </RadioGroup>
                 </div>
@@ -205,19 +344,20 @@ export default function Payment() {
                     <h2 className="font-display text-2xl">Payment Method</h2>
                   </div>
 
-                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
                     <div className={cn(
                       'p-4 border rounded-lg transition-colors',
-                      paymentMethod === 'card' && 'border-primary'
+                      paymentMethod === 'CARD' && 'border-primary'
                     )}>
                       <div className="flex items-center gap-3">
-                        <RadioGroupItem value="card" id="card" />
+                        <RadioGroupItem value="CARD" id="card" />
+                        <CreditCard className="h-5 w-5 text-muted-foreground" />
                         <Label htmlFor="card" className="font-medium">
                           Credit / Debit Card
                         </Label>
                       </div>
-                      
-                      {paymentMethod === 'card' && (
+
+                      {paymentMethod === 'CARD' && (
                         <div className="mt-4 space-y-4 pl-6">
                           <div className="space-y-2">
                             <Label htmlFor="cardNumber">Card Number</Label>
@@ -243,13 +383,19 @@ export default function Payment() {
 
                     <div className={cn(
                       'p-4 border rounded-lg mt-3 transition-colors',
-                      paymentMethod === 'paypal' && 'border-primary'
+                      paymentMethod === 'CASH_ON_DELIVERY' && 'border-primary'
                     )}>
                       <div className="flex items-center gap-3">
-                        <RadioGroupItem value="paypal" id="paypal" />
-                        <Label htmlFor="paypal" className="font-medium">
-                          PayPal
-                        </Label>
+                        <RadioGroupItem value="CASH_ON_DELIVERY" id="cod" />
+                        <Banknote className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <Label htmlFor="cod" className="font-medium">
+                            Cash on Delivery
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Pay when you receive your order
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </RadioGroup>
@@ -269,15 +415,19 @@ export default function Payment() {
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <h3 className="font-medium mb-2">Shipping Address</h3>
                     <p className="text-sm text-muted-foreground">
-                      John Doe<br />
-                      123 Main Street<br />
-                      Portland, OR 97201<br />
-                      United States
+                      {shippingAddress.firstName} {shippingAddress.lastName}<br />
+                      {shippingAddress.street}
+                      {shippingAddress.apartment && `, ${shippingAddress.apartment}`}<br />
+                      {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}<br />
+                      {shippingAddress.country}
+                      {shippingAddress.phone && <><br />Phone: {shippingAddress.phone}</>}
+                      {shippingAddress.email && <><br />Email: {shippingAddress.email}</>}
                     </p>
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="p-0 h-auto text-sm"
                       onClick={() => setStep('shipping')}
+                      type="button"
                     >
                       Edit
                     </Button>
@@ -286,34 +436,35 @@ export default function Payment() {
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <h3 className="font-medium mb-2">Payment Method</h3>
                     <p className="text-sm text-muted-foreground">
-                      Visa ending in 4242
+                      {paymentMethod === 'CARD' ? 'Credit / Debit Card' : 'Cash on Delivery'}
                     </p>
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="p-0 h-auto text-sm"
                       onClick={() => setStep('payment')}
+                      type="button"
                     >
                       Edit
                     </Button>
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="font-medium">Items ({mockCartItems.length})</h3>
-                    {mockCartItems.map(item => (
-                      <div key={item.id} className="flex gap-4 p-3 bg-card rounded-lg border">
+                    <h3 className="font-medium">Items ({cartItems.length})</h3>
+                    {cartItems.map(item => (
+                      <div key={item.productId} className="flex gap-4 p-3 bg-card rounded-lg border">
                         <img
-                          src={item.product.images[0]?.url}
-                          alt={item.product.name}
+                          src={item.productImage}
+                          alt={item.productName}
                           className="w-16 h-16 rounded object-cover"
                         />
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{item.product.name}</p>
+                          <p className="font-medium text-sm">{item.productName}</p>
                           <p className="text-xs text-muted-foreground">
-                            Qty: {item.quantity}
+                            Qty: {item.quantity} × Rs. {item.price.toFixed(2)}
                           </p>
                         </div>
                         <span className="font-medium">
-                          ${(item.product.price * item.quantity).toFixed(2)}
+                          Rs. {(item.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -331,12 +482,18 @@ export default function Payment() {
                     Back
                   </Button>
                 )}
-                <Button type="submit" className="flex-1" disabled={isProcessing}>
-                  {isProcessing 
-                    ? 'Processing...' 
-                    : step === 'review' 
-                    ? `Pay $${total.toFixed(2)}` 
-                    : 'Continue'
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={createOrderMutation.isPending}
+                >
+                  {createOrderMutation.isPending
+                    ? 'Processing...'
+                    : step === 'review'
+                      ? paymentMethod === 'CARD'
+                        ? `Pay Rs. ${total.toFixed(2)}`
+                        : `Place Order - Rs. ${total.toFixed(2)}`
+                      : 'Continue'
                   }
                 </Button>
               </div>
@@ -351,24 +508,24 @@ export default function Payment() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
-                    Subtotal ({mockCartItems.length} items)
+                    Subtotal ({cartItems.length} items)
                   </span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>Rs. {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
                   <span className={cn(shipping === 0 && 'text-sage-dark')}>
-                    {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? 'FREE' : `Rs. ${shipping.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>Rs. {tax.toFixed(2)}</span>
                 </div>
                 <Separator className="my-4" />
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
             </div>

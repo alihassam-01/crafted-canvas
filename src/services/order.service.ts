@@ -1,8 +1,8 @@
 import { api } from '@/lib/api';
-import { ApiResponse, PaginatedResponse, Order } from '@/types/api';
+import { ApiResponse, PaginatedResponse, Order, CreateOrderRequest } from '@/types/api';
 
 export const orderService = {
-  createOrder: async (data: any): Promise<ApiResponse<Order>> => {
+  createOrder: async (data: CreateOrderRequest): Promise<ApiResponse<Order>> => {
     return api.request<Order>('orders', '', {
       method: 'POST',
       body: JSON.stringify(data),

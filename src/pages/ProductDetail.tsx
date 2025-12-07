@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Star, Heart, ShoppingBag, Minus, Plus, Truck, Shield,
@@ -30,10 +30,13 @@ import { productService } from '@/services/product.service';
 import { reviewService } from '@/services/review.service';
 import { cartService } from '@/services/cart.service';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const [selectedColor, setSelectedColor] = useState<string | undefined>();
@@ -106,6 +109,17 @@ export default function ProductDetail() {
     : product.price;
 
   const handleAddToCart = () => {
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      toast.error('Please sign in to add items to cart', {
+        action: {
+          label: 'Sign in',
+          onClick: () => navigate('/auth?mode=login'),
+        },
+      });
+      return;
+    }
+
     if (sizeVariation && !selectedSize) {
       toast.error('Please select a size');
       return;
@@ -118,7 +132,10 @@ export default function ProductDetail() {
     addToCartMutation.mutate({
       productId: product.id,
       quantity,
-      variationId: sizeVariation?.options.find(o => o.value === selectedSize)?.id, // Simplified logic
+      price: currentPrice,
+      productName: product.name,
+      productImage: images[0],
+      variationId: sizeVariation?.options.find(o => o.value === selectedSize)?.id,
     });
   };
 

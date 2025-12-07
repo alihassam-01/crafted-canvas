@@ -121,6 +121,7 @@ export interface Order {
   orderNumber: string;
   status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentMethod?: PaymentMethod;
   total: number;
   subtotal: number;
   tax: number;
@@ -142,6 +143,14 @@ export interface Address {
   state: string;
   country: string;
   postalCode: string;
+}
+
+export type PaymentMethod = 'CARD' | 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'WALLET';
+
+export interface CreateOrderRequest {
+  shippingAddress: Address;
+  billingAddress?: Address;
+  paymentMethod: PaymentMethod;
 }
 
 export interface Review {

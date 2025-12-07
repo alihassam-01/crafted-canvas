@@ -6,7 +6,15 @@ export const cartService = {
     return api.request<Cart>('cart', '');
   },
 
-  addItem: async (data: { productId: string; quantity: number; variationId?: string }): Promise<ApiResponse<Cart>> => {
+  addItem: async (data: { 
+    productId: string; 
+    shopId?: string;
+    quantity: number; 
+    price: number;
+    productName: string;
+    productImage: string;
+    variationId?: string;
+  }): Promise<ApiResponse<Cart>> => {
     return api.request<Cart>('cart', '/items', {
       method: 'POST',
       body: JSON.stringify(data),

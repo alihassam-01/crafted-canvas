@@ -1,9 +1,13 @@
-import { Link } from 'react-router-dom';
-import { Heart, Star, ShoppingBag } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Heart, Star, ShoppingBag, Loader2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { cartService } from '@/services/cart.service';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ProductCardProps {
   product: Product;
@@ -11,12 +15,50 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
   // API returns images as string[], so we take the first one
   const primaryImage = product.images && product.images.length > 0 ? product.images[0] : '/placeholder-product.jpg';
 
   const discount = product.compareAtPrice
     ? Math.round((1 - product.price / product.compareAtPrice) * 100)
     : null;
+
+  const addToCartMutation = useMutation({
+    mutationFn: cartService.addItem,
+    onSuccess: () => {
+      toast.success('Added to cart');
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+    onError: () => {
+      toast.error('Failed to add to cart');
+    },
+  });
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      toast.error('Please sign in to add items to cart', {
+        action: {
+          label: 'Sign in',
+          onClick: () => navigate('/auth?mode=login'),
+        },
+      });
+      return;
+    }
+
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity: 1,
+      price: product.price,
+      productName: product.name,
+      productImage: primaryImage,
+    });
+  };
 
   return (
     <div className={cn('group relative', className)}>
@@ -56,12 +98,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
             <Button
               className="w-full gap-2"
-              onClick={(e) => {
-                e.preventDefault();
-                // Add to cart logic
-              }}
+              onClick={handleAddToCart}
+              disabled={addToCartMutation.isPending}
             >
-              <ShoppingBag className="h-4 w-4" />
+              {addToCartMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ShoppingBag className="h-4 w-4" />
+              )}
               Quick Add
             </Button>
           </div>
