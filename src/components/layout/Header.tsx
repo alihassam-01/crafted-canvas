@@ -19,10 +19,9 @@ import { cartService } from '@/services/cart.service';
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Shops', href: '/shops' },
-  { name: 'Crochet', href: '/products?category=crochet' },
-  { name: 'Arts/Painting', href: '/products?category=painting' },
-  { name: 'Hand Crafts', href: '/products?category=handicraft' },
-  { name: 'About', href: '/about' },
+  { name: 'Crafts', href: '/products?category=crochet&category=handicraft' },
+  { name: 'Arts Gallery', href: '/arts-gallery' },
+  { name: 'About Us', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ];
 

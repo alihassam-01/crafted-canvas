@@ -7,7 +7,7 @@ const footerLinks = {
   shop: [
     { name: 'All Products', href: '/products' },
     { name: 'Crochet', href: '/products?category=crochet' },
-    { name: 'Art & Painting', href: '/products?category=painting' },
+    { name: 'Art & Painting', href: '/products?category=art&category=painting' },
     { name: 'Handicrafts', href: '/products?category=handicraft' },
     { name: 'New Arrivals', href: '/products?sort=newest' },
   ],
