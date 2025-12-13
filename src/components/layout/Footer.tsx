@@ -36,7 +36,7 @@ export function Footer() {
         <img
           src="/news.svg"
           alt=""
-          className="w-full h-auto block"
+          className="w-full h-auto min-h-[350px] object-cover block"
         />
         {/* Content overlay */}
         <div className="absolute inset-0 flex items-center justify-center">

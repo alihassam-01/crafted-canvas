@@ -73,11 +73,11 @@ export default function Index() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="flex overflow-x-auto pb-4 gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-8 max-w-6xl mx-auto scrollbar-hide">
               {featuredProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="animate-fade-up"
+                  className="animate-fade-up w-[320px] sm:w-auto sm:min-w-[220px] lg:min-w-0 flex-shrink-0 snap-center"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ProductCard product={product} />

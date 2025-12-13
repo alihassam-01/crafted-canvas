@@ -61,10 +61,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
   };
 
   return (
-    <div className={cn('group relative bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-gray-100', className)}>
+    <div className={cn('group relative bg-white rounded-2xl sm:rounded-[2rem] p-2 sm:p-3 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-gray-100', className)}>
       <Link to={`/products/${product.id}`} className="block relative z-10">
         {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-gray-50">
+        <div className="relative aspect-square overflow-hidden rounded-xl sm:rounded-[1.5rem] bg-gray-50">
           <img
             src={primaryImage}
             alt={product.name}
