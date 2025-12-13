@@ -29,24 +29,37 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="bg-card border-t">
+    <footer className="bg-card ">
       {/* Newsletter Section */}
-      <div className="bg-gradient-hero py-12">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="font-display text-2xl md:text-3xl mb-2">
-            Join Our Creative Community
-          </h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Get inspired with new arrivals, crevator stories, and exclusive offers.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 bg-background"
-            />
-            <Button type="submit">Subscribe</Button>
-          </form>
+      <div className="relative">
+        {/* Background SVG with rough edges preserved */}
+        <img
+          src="/news.svg"
+          alt=""
+          className="w-full h-auto block"
+        />
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="container mx-auto px-4 text-center">
+            <div className="relative inline-block mb-2">
+              <h3 className="relative font-cursive text-3xl md:text-4xl text-white px-4">
+                Join Our Creative Community
+              </h3>
+            </div>
+            <p className="text-white/90 mb-6 max-w-md mx-auto text-md px-2">
+              Get inspired with new arrivale, crevator stories, and exclusive offers.
+            </p>
+            <form className="flex items-center gap-0 max-w-md mx-auto bg-white rounded-full overflow-hidden shadow-md">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-6"
+              />
+              <Button type="submit" className="rounded-full m-1 px-6 bg-gradient-to-r from-teal-400 to-berry-pink hover:opacity-90">
+                Subscribe
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -56,9 +69,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-warm flex items-center justify-center">
-                <span className="text-primary-foreground font-display text-xl">A</span>
-              </div>
+              <img src="/crevea-logo.png" alt="Crevea" className="h-10 w-auto object-contain" />
               <span className="font-display text-xl">Crevea</span>
             </Link>
             <p className="text-muted-foreground text-sm mb-4">

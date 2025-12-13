@@ -18,7 +18,7 @@ import { cartService } from '@/services/cart.service';
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Shop', href: '/products' },
+  { name: 'Shops', href: '/shops' },
   { name: 'Crochet', href: '/products?category=crochet' },
   { name: 'Arts/Painting', href: '/products?category=painting' },
   { name: 'Hand Crafts', href: '/products?category=handicraft' },
@@ -79,8 +79,9 @@ export function Header() {
           </button>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/crevea-logo.png" alt="Crevea" className="h-16 w-auto object-contain" />
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src="/crevea-logo.png" alt="Crevea" className="h-12 w-auto object-contain" />
+            <span className="text-2xl font-bold group-hover:text-primary transition-colors">Crevea</span>
           </Link>
 
           {/* Desktop Navigation */}

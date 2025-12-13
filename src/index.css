@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,7 @@
   :root {
     /* Watercolor Artistic Palette */
     /* Canvas Cream Background */
-    --background: 43 64% 98%;
+    --background: 33 39% 91%;
     /* Charcoal Slate Foreground */
     --foreground: 210 29% 24%;
 
@@ -28,7 +28,8 @@
     --secondary-foreground: 43 64% 98%;
 
     /* Warm Grey Muted */
-    --muted: 0 0% 90%; /* Lighter version of warm grey for backgrounds */
+    --muted: 0 0% 90%;
+    /* Lighter version of warm grey for backgrounds */
     --muted-foreground: 0 0% 55%;
 
     /* Teal Blue Accent */
@@ -38,7 +39,8 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 85%; /* Light grey */
+    --border: 0 0% 85%;
+    /* Light grey */
     --input: 0 0% 85%;
     --ring: 343 48% 57%;
 
@@ -48,19 +50,19 @@
     --berry-pink: 343 48% 57%;
     --royal-lavender: 260 25% 55%;
     --teal-blue: 185 38% 48%;
-    
-    --canvas-cream: 43 64% 98%;
+
+    --canvas-cream: 33 39% 91%;
     --charcoal-slate: 210 29% 24%;
     --warm-grey: 0 0% 55%;
     --soft-beige: 33 40% 91%;
-    
+
     /* Gradients */
     /* Watercolor wash effect */
     --gradient-hero: linear-gradient(135deg, hsl(343 48% 57% / 0.15) 0%, hsl(260 25% 55% / 0.15) 50%, hsl(185 38% 48% / 0.15) 100%);
     --gradient-card: linear-gradient(180deg, hsl(43 64% 98%) 0%, hsl(33 40% 91% / 0.5) 100%);
     --gradient-warm: linear-gradient(135deg, hsl(343 48% 57%) 0%, hsl(260 25% 55%) 100%);
     --gradient-sage: linear-gradient(135deg, hsl(185 38% 48%) 0%, hsl(260 25% 55%) 100%);
-    
+
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(210 29% 24% / 0.08);
     --shadow-medium: 0 8px 30px -8px hsl(210 29% 24% / 0.12);
@@ -89,7 +91,8 @@
     --popover: 210 29% 15%;
     --popover-foreground: 43 64% 95%;
 
-    --primary: 343 48% 65%; /* Slightly lighter for dark mode */
+    --primary: 343 48% 65%;
+    /* Slightly lighter for dark mode */
     --primary-foreground: 43 64% 98%;
 
     --secondary: 260 25% 65%;
@@ -128,7 +131,12 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -154,24 +162,49 @@
     @apply backdrop-blur-md bg-background/80 border border-border/50;
   }
 
-  .artistic-border {
-    @apply border-2 border-dashed border-primary/30 rounded-2xl;
+  .font-cursive {
+    font-family: 'Dancing Script', cursive;
   }
 
-  .organic-shape {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  .brush-stroke {
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5,20 C30,10 170,5 195,20 C180,35 20,30 5,20 Z' fill='rgba(255, 253, 246, 0.9)' /%3E%3C/svg%3E") no-repeat center center;
+    background-size: 100% 100%;
+  }
+
+  .organic-shape-1 {
+    border-radius: 8% 15% 12% 18% / 15% 10% 18% 12%;
+    border: 6px solid rgba(180, 130, 200, 0.75);
+    box-shadow: 0 4px 20px rgba(180, 130, 200, 0.2);
+    transform: rotate(-1deg);
+  }
+
+  .organic-shape-2 {
+    border-radius: 15% 8% 18% 12% / 10% 15% 12% 18%;
+    border: 6px solid rgba(220, 170, 140, 0.75);
+    box-shadow: 0 4px 20px rgba(220, 170, 140, 0.2);
+    transform: rotate(0.5deg);
+  }
+
+  .organic-shape-3 {
+    border-radius: 12% 18% 8% 15% / 18% 12% 15% 10%;
+    border: 6px solid rgba(130, 190, 180, 0.75);
+    box-shadow: 0 4px 20px rgba(130, 190, 180, 0.2);
+    transform: rotate(-0.5deg);
+  }
+
+  .btn-hand-drawn {
+    @apply relative px-8 py-3 bg-transparent font-cursive text-xl text-charcoal-slate transition-all duration-300;
+    border: 2px solid #333;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  }
+
+  .btn-hand-drawn:hover {
+    border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+    background-color: rgba(0, 0, 0, 0.02);
   }
 }
 
 @layer utilities {
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-fade-up {
-    animation: fadeUp 0.6s ease-out forwards;
-  }
-
   .animate-scale-in {
     animation: scaleIn 0.4s ease-out forwards;
   }
@@ -180,16 +213,37 @@
     animation: slideIn 0.5s ease-out forwards;
   }
 
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
-  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.4s;
+  }
+
+  .stagger-5 {
+    animation-delay: 0.5s;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes fadeUp {
@@ -197,6 +251,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -208,6 +263,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -219,6 +275,7 @@
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

@@ -180,7 +180,7 @@ export default function Products() {
             value={priceRange}
             onValueChange={setPriceRange}
             max={10000}
-            // step={1}
+            step={1}
             className="mb-3"
           />
         </div>

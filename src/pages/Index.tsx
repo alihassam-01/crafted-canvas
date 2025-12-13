@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Sparkles, Heart, Package, Shield, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ShopCard } from '@/components/shops/ShopCard';
@@ -12,7 +12,7 @@ import { shopService } from '@/services/shop.service';
 export default function Index() {
   const { data: productsData, isLoading: isProductsLoading } = useQuery({
     queryKey: ['featured-products'],
-    queryFn: () => productService.listProducts({ limit: 4, sortBy: 'popular' }),
+    queryFn: () => productService.listProducts({ limit: 3, sortBy: 'popular' }),
   });
 
   const { data: shopsData, isLoading: isShopsLoading } = useQuery({
@@ -58,94 +58,14 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-20 lg:py-28 bg-canvas-cream">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {/* Crochet Category */}
-            <div className="flex flex-col items-center group">
-              <div className="relative mb-8 w-full flex justify-center">
-                {/* Brush Stroke Background for Title */}
-                <div className="absolute inset-0 bg-berry-pink/80 transform -skew-x-12 scale-110 rounded-sm blur-[1px] opacity-90"></div>
-                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
-                  Crochet Creations
-                </h3>
-              </div>
-              <Link to="/products?category=crochet" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
-                <img
-                  src="https://images.unsplash.com/photo-1584992236310-6eddd724a4c7?auto=format&fit=crop&q=80&w=800"
-                  alt="Crochet Creations"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </Link>
-              <Button variant="ghost" className="mt-4 text-berry-pink hover:text-berry-pink/80 hover:bg-berry-pink/10" asChild>
-                <Link to="/products?category=crochet">View All</Link>
-              </Button>
-            </div>
-
-            {/* Art & Painting Category */}
-            <div className="flex flex-col items-center group mt-12 md:mt-0">
-              <div className="relative mb-8 w-full flex justify-center">
-                {/* Brush Stroke Background for Title */}
-                <div className="absolute inset-0 bg-royal-lavender/80 transform skew-x-12 scale-110 rounded-sm blur-[1px] opacity-90"></div>
-                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
-                  Art & Painting Gallery
-                </h3>
-              </div>
-              <Link to="/products?category=painting" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
-                <img
-                  src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800"
-                  alt="Art & Painting"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </Link>
-              <Button variant="ghost" className="mt-4 text-royal-lavender hover:text-royal-lavender/80 hover:bg-royal-lavender/10" asChild>
-                <Link to="/products?category=painting">View All</Link>
-              </Button>
-            </div>
-
-            {/* Hand Crafts Category */}
-            <div className="flex flex-col items-center group mt-12 md:mt-0">
-              <div className="relative mb-8 w-full flex justify-center">
-                {/* Brush Stroke Background for Title */}
-                <div className="absolute inset-0 bg-teal-blue/80 transform -skew-x-6 scale-110 rounded-sm blur-[1px] opacity-90"></div>
-                <h3 className="relative z-10 font-display text-2xl text-white px-6 py-2 italic tracking-wide">
-                  Unique Hand Crafts
-                </h3>
-              </div>
-              <Link to="/products?category=handicraft" className="w-full aspect-square overflow-hidden rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500">
-                <img
-                  src="https://images.unsplash.com/photo-1605218427368-35b019b8a391?auto=format&fit=crop&q=80&w=800"
-                  alt="Hand Crafts"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </Link>
-              <Button variant="ghost" className="mt-4 text-teal-blue hover:text-teal-blue/80 hover:bg-teal-blue/10" asChild>
-                <Link to="/products?category=handicraft">View All</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Products */}
-      <section className="py-16 lg:py-24 bg-white/50">
+      <section className="py-16 lg:py-24 bg-canvas-cream">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl mb-4 text-charcoal-slate">
-                Featured Products
-              </h2>
-              <p className="text-muted-foreground">
-                Handpicked treasures from our talented crevators
-              </p>
-            </div>
-            <Button variant="ghost" asChild className="hidden sm:flex text-charcoal-slate">
-              <Link to="/products">
-                View All
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+          <div className="text-center mb-16">
+            <span className="font-cursive text-3xl text-muted-foreground block mb-3 transform -rotate-2">Handpicked for you</span>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal-slate drop-shadow-sm">
+              Featured Products
+            </h2>
           </div>
 
           {isProductsLoading ? (
@@ -153,7 +73,7 @@ export default function Index() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {featuredProducts.map((product, index) => (
                 <div
                   key={product.id}
@@ -165,65 +85,92 @@ export default function Index() {
               ))}
             </div>
           )}
+        </div>
+      </section>
 
-          <div className="mt-8 text-center sm:hidden">
-            <Button asChild>
-              <Link to="/products">View All Products</Link>
-            </Button>
+      {/* Categories Section */}
+      <section className="py-20 lg:py-28 bg-canvas-cream">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="font-cursive text-3xl text-muted-foreground block mb-3 transform -rotate-2">Explore our collections</span>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal-slate drop-shadow-sm">
+              Browse by Category
+            </h2>
+          </div>
+          <div className="flex flex-wrap justify-center gap-12 lg:gap-20">
+            {/* Crochet Category - Card 1 */}
+            {/* Crochet Category - Card 1 */}
+            <Link to="/products?category=crochet" className="group relative w-72 h-72 md:w-80 md:h-80 transition-transform duration-300 hover:scale-105">
+              <div className="absolute inset-0 overflow-hidden rounded-3xl">
+                <img
+                  src="/crochet-f.png"
+                  alt="Crochet Creations"
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+                {/* <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative flex items-center justify-center transform -rotate-2 group-hover:rotate-0 transition-transform duration-300 w-64 h-24">
+                    <img src="/text-bg.svg" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+                    <span className="relative font-cursive text-2xl text-charcoal-slate pt-1 z-10">Crochet Creations</span>
+                  </div>
+                </div> */}
+              </div>
+            </Link>
+
+            {/* Art & Painting Category - Card 2 */}
+            <Link to="/products?category=painting" className="group relative w-72 h-72 md:w-80 md:h-80 transition-transform duration-300 hover:scale-105 mt-8 md:mt-0">
+              <div className="absolute inset-0 overflow-hidden rounded-3xl">
+                <img
+                  src="/painting-f.png"
+                  alt="Painting"
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+                {/* <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative flex items-center justify-center transform rotate-1 group-hover:rotate-0 transition-transform duration-300 w-64 h-18">
+                    <img src="/text-bg.svg" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+                    <span className="relative font-cursive text-2xl text-charcoal-slate pt-1 z-10">Painting</span>
+                  </div>
+                </div> */}
+              </div>
+            </Link>
+
+            {/* Hand Crafts Category - Card 3 */}
+            <Link to="/products?category=handicraft" className="group relative w-72 h-72 md:w-80 md:h-80 transition-transform duration-300 hover:scale-105 mt-8 md:mt-0">
+              <div className="absolute inset-0 overflow-hidden rounded-3xl">
+                <img
+                  src="/handcraft-f.png"
+                  alt="Hand Crafts"
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+                {/* <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative flex items-center justify-center transform -rotate-1 group-hover:rotate-0 transition-transform duration-300 w-64 h-24">
+                    <img src="/text-bg.svg" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+                    <span className="relative font-cursive text-2xl text-charcoal-slate pt-1 z-10">Hand Crafts</span>
+                  </div>
+                </div> */}
+              </div>
+            </Link>
+          </div>
+
+          <div className="mt-16 text-center">
+            <Link to="/products" className="inline-block">
+              <button className="btn-hand-drawn">
+                View All
+              </button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Value Props */}
+
+
+      {/* Cravators of the Week */}
       <section className="py-16 lg:py-24 bg-canvas-cream">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Heart,
-                title: 'Made with Love',
-                description: 'Every item is crafted by skilled crevators who pour their heart into their work.',
-              },
-              {
-                icon: Package,
-                title: 'Secure Packaging',
-                description: 'Your treasures are carefully packaged to arrive safely at your doorstep.',
-              },
-              {
-                icon: Shield,
-                title: 'Buyer Protection',
-                description: 'Shop with confidence knowing your purchase is protected.',
-              },
-            ].map((item, index) => (
-              <div
-                key={item.title}
-                className="text-center p-8 rounded-3xl bg-white/80 border border-border/50 shadow-sm animate-fade-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-soft-beige flex items-center justify-center text-charcoal-slate">
-                  <item.icon className="h-8 w-8" />
-                </div>
-                <h3 className="font-display text-xl mb-3 text-charcoal-slate">{item.title}</h3>
-                <p className="text-muted-foreground">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Shops */}
-      <section className="py-16 lg:py-24 relative overflow-hidden">
-        {/* Background Wash */}
-        <div className="absolute inset-0 bg-gradient-hero opacity-30"></div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl mb-4 text-charcoal-slate">
-              Meet Our Crevators
+          <div className="text-center mb-16">
+            <span className="font-cursive text-3xl text-muted-foreground block mb-3 transform -rotate-2">Meet our talented artists</span>
+            <h2 className="font-display text-4xl md:text-5xl text-charcoal-slate drop-shadow-sm">
+              Cravators of the Week
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover the creative minds behind the handmade magic
-            </p>
           </div>
 
           {isShopsLoading ? (
@@ -231,7 +178,7 @@ export default function Index() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {featuredShops.map((shop, index) => (
                 <div
                   key={shop.id}
@@ -245,10 +192,10 @@ export default function Index() {
           )}
 
           <div className="mt-12 text-center">
-            <Button size="lg" variant="outline" className="bg-white/80 border-charcoal-slate/20 hover:bg-white" asChild>
+            <Button variant="outline" size="lg" className="rounded-full" asChild>
               <Link to="/shops">
-                Explore All Shops
-                <ArrowRight className="h-4 w-4" />
+                View All Shops
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>

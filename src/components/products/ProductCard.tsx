@@ -61,22 +61,22 @@ export function ProductCard({ product, className }: ProductCardProps) {
   };
 
   return (
-    <div className={cn('group relative', className)}>
-      <Link to={`/products/${product.id}`} className="block">
+    <div className={cn('group relative bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all duration-500 border border-transparent hover:border-gray-100', className)}>
+      <Link to={`/products/${product.id}`} className="block relative z-10">
         {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
+        <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-gray-50">
           <img
             src={primaryImage}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
 
           {/* Overlay Actions */}
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
           {/* Wishlist Button */}
           <button
-            className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110"
+            className="absolute top-3 right-3 p-2.5 rounded-full bg-white/90 backdrop-blur-sm text-charcoal-slate opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 shadow-sm"
             onClick={(e) => {
               e.preventDefault();
               // Add to wishlist logic
@@ -88,16 +88,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {discount && (
-              <Badge className="bg-primary text-primary-foreground">
+              <Badge className="bg-berry-pink text-white border-none px-2 py-0.5 text-xs font-medium">
                 -{discount}%
               </Badge>
             )}
           </div>
 
-          {/* Quick Add Button */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          {/* Add to Cart Button (Icon) */}
+          <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
             <Button
-              className="w-full gap-2"
+              size="icon"
+              className="h-10 w-10 rounded-full bg-white/90 text-charcoal-slate hover:bg-charcoal-slate hover:text-white shadow-md border-none"
               onClick={handleAddToCart}
               disabled={addToCartMutation.isPending}
             >
@@ -106,41 +107,31 @@ export function ProductCard({ product, className }: ProductCardProps) {
               ) : (
                 <ShoppingBag className="h-4 w-4" />
               )}
-              Quick Add
             </Button>
           </div>
         </div>
       </Link>
 
       {/* Product Info */}
-      <div className="mt-4 space-y-2">
-        <Link
-          to={`/shops/${product?.shop?.id}`}
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
-        >
-          {product?.shop?.name}
-        </Link>
-
+      <div className="mt-4 px-1 pb-1">
         <Link to={`/products/${product.slug}`}>
-          <h3 className="font-medium line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-display text-lg text-charcoal-slate line-clamp-1 group-hover:text-berry-pink transition-colors mb-1">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-primary text-primary" />
-            <span className="text-sm font-medium">{product.rating}</span>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            ({product.totalReviews})
-          </span>
+        {/* Rating */}
+        <div className="flex items-center gap-1 mb-2">
+          <Star className="h-3.5 w-3.5 fill-berry-pink text-berry-pink" />
+          <span className="text-sm font-medium text-charcoal-slate">{product.rating}</span>
+          <span className="text-xs text-muted-foreground">({product.totalReviews})</span>
         </div>
 
+        {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg">${product.price.toFixed(2)}</span>
+          <span className="font-display text-xl font-medium text-charcoal-slate">${product.price.toFixed(2)}</span>
           {product.compareAtPrice && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-sm text-muted-foreground line-through decoration-muted-foreground/50">
               ${product.compareAtPrice.toFixed(2)}
             </span>
           )}
